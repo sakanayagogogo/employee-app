@@ -1,0 +1,103 @@
+﻿
+> employee-app@0.1.0 build
+> next build
+
+笆ｲ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+笨・Compiled successfully in 14.8s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/44) ...
+  Generating static pages using 11 workers (11/44) 
+  Generating static pages using 11 workers (22/44) 
+  Generating static pages using 11 workers (33/44) 
+笨・Generating static pages using 11 workers (44/44) in 1560.0ms
+  Finalizing page optimization ...
+
+Route (app)
+笏・笳・/
+笏・笳・/_not-found
+笏・笳・/admin
+笏・笳・/admin/announcements
+笏・ﾆ・/admin/announcements/[id]/stats
+笏・笳・/admin/inquiries
+笏・笳・/admin/masters
+笏・笳・/admin/masters/categories
+笏・笳・/admin/menu
+笏・笳・/admin/menu/new
+笏・ﾆ・/admin/menu/widget/[widgetId]
+笏・ﾆ・/admin/menu/widget/[widgetId]/responses
+笏・笳・/admin/officers
+笏・笳・/admin/stores
+笏・笳・/admin/users
+笏・ﾆ・/admin/users/[id]
+笏・笳・/admin/users/new
+笏・笳・/announcements
+笏・ﾆ・/announcements/[id]
+笏・ﾆ・/api/admin/master-data
+笏・ﾆ・/api/admin/master-data/[id]
+笏・ﾆ・/api/admin/master-data/csv
+笏・ﾆ・/api/admin/menu/responses/[responseId]/status
+笏・ﾆ・/api/admin/stats
+笏・ﾆ・/api/admin/store-groups
+笏・ﾆ・/api/admin/store-groups/[id]
+笏・ﾆ・/api/admin/stores
+笏・ﾆ・/api/admin/stores/[id]
+笏・ﾆ・/api/admin/stores/bulk
+笏・ﾆ・/api/admin/stores/csv
+笏・ﾆ・/api/admin/users
+笏・ﾆ・/api/admin/users/[id]
+笏・ﾆ・/api/admin/users/csv
+笏・ﾆ・/api/announcements
+笏・ﾆ・/api/announcements/[id]
+笏・ﾆ・/api/announcements/[id]/bookmark
+笏・ﾆ・/api/announcements/[id]/comments
+笏・ﾆ・/api/announcements/[id]/like
+笏・ﾆ・/api/announcements/[id]/likes
+笏・ﾆ・/api/announcements/[id]/read
+笏・ﾆ・/api/announcements/[id]/reads
+笏・ﾆ・/api/announcements/[id]/stats
+笏・ﾆ・/api/announcements/unread-count
+笏・ﾆ・/api/auth/login
+笏・ﾆ・/api/auth/logout
+笏・ﾆ・/api/auth/me
+笏・ﾆ・/api/inquiries
+笏・ﾆ・/api/inquiries/[id]
+笏・ﾆ・/api/inquiries/[id]/message
+笏・ﾆ・/api/inquiries/[id]/read
+笏・ﾆ・/api/inquiries/[id]/status
+笏・ﾆ・/api/inquiries/unread-count
+笏・ﾆ・/api/menu
+笏・ﾆ・/api/menu/[storeId]/layout
+笏・ﾆ・/api/menu/[storeId]/widget
+笏・ﾆ・/api/menu/categories
+笏・ﾆ・/api/menu/widget
+笏・ﾆ・/api/menu/widget/[widgetId]
+笏・ﾆ・/api/menu/widget/[widgetId]/respond
+笏・ﾆ・/api/menu/widget/[widgetId]/responses
+笏・ﾆ・/api/menu/widget/[widgetId]/results
+笏・ﾆ・/api/push/subscribe
+笏・ﾆ・/api/push/vapid-key
+笏・ﾆ・/api/users/me/bookmarks
+笏・ﾆ・/api/users/me/notification-preferences
+笏・ﾆ・/api/users/me/password
+笏・ﾆ・/api/users/me/profile
+笏・笳・/home
+笏・笳・/inquiries
+笏・ﾆ・/inquiries/[id]
+笏・笳・/login
+笏・笳・/menu
+笏・ﾆ・/menu/widget/[widgetId]
+笏・笳・/newsletter
+笏・ﾆ・/portal/[storeId]
+笏・ﾆ・/portal/[storeId]/widget/[widgetId]
+笏・笳・/profile
+
+
+ﾆ・Proxy (Middleware)
+
+笳・ (Static)   prerendered as static content
+ﾆ・ (Dynamic)  server-rendered on demand
+

@@ -1,0 +1,24 @@
+{
+    "name": "KIZUNA - とりせん労働組合",
+    "short_name": "KIZUNA",
+    "description": "とりせん労働組合向けの連絡・エンゲージメントプラットフォーム",
+    "start_url": "/home",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1877F2",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/kizuna-color.svg",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/kizuna-color.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

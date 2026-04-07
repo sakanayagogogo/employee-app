@@ -1,0 +1,13 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="100" fill="#0f172a" />
+  <circle cx="100" cy="100" r="40" stroke="url(#sunGrad)" stroke-width="20" stroke-dasharray="20 10" />
+  <circle cx="100" cy="60" r="15" fill="#92FE9D" />
+  <circle cx="65" cy="120" r="15" fill="#3b82f6" />
+  <circle cx="135" cy="120" r="15" fill="#fbbf24" />
+</svg>

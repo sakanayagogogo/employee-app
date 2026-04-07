@@ -1,0 +1,20 @@
+[
+  {
+    "category": "employment_type",
+    "code": "3",
+    "name": "PL",
+    "is_non_union": false
+  },
+  {
+    "category": "branch_officer",
+    "code": "19",
+    "name": "PL委員",
+    "is_non_union": false
+  },
+  {
+    "category": "union_role",
+    "code": "88",
+    "name": "非組合員",
+    "is_non_union": true
+  }
+]

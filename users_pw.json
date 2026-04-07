@@ -1,0 +1,32 @@
+[
+  {
+    "employee_number": "000101",
+    "name": "渋谷 店長",
+    "birthday": null,
+    "password_hash": "$2b$12$pQT.DCAsALdPVzem2GzFHOlix9GMqNIUpQI.oDt8dmSo9ALEzQIL."
+  },
+  {
+    "employee_number": "001001",
+    "name": "山田 花子",
+    "birthday": null,
+    "password_hash": "$2b$12$pQT.DCAsALdPVzem2GzFHOlix9GMqNIUpQI.oDt8dmSo9ALEzQIL."
+  },
+  {
+    "employee_number": "090017",
+    "name": "中村知宏",
+    "birthday": "1972-02-19T15:00:00.000Z",
+    "password_hash": "$2b$12$L57SkyegaKFetrvvqp5zNu.xp06id53fQMSDgVa5atMjQwUF2hbYa"
+  },
+  {
+    "employee_number": "090013",
+    "name": "福田武",
+    "birthday": "1967-11-25T15:00:00.000Z",
+    "password_hash": "$2b$12$FCW.T5Y3j.UHTL0LV.tdDuNYY68dyM7EGFdtRdg0/t.Fg04pBUpU."
+  },
+  {
+    "employee_number": "650700",
+    "name": "石川由加里",
+    "birthday": "1973-02-27T15:00:00.000Z",
+    "password_hash": "$2b$12$MtQQtTzLp73.poHwiWUlvOjzoNwqsuoI6Ur5Dbju/aJogP25u/p8G"
+  }
+]
