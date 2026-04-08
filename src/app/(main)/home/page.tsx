@@ -21,6 +21,7 @@ interface Announcement {
     commentsCount: number;
     attachments?: { name: string; url: string }[];
     hasBookmarked: boolean;
+    hasLiked: boolean;
 }
 
 interface Inquiry {
@@ -102,7 +103,8 @@ function AnnouncementModal({ annId, onClose }: { annId: number, onClose: () => v
             const data = await res.json();
             setAnn(prev => prev ? {
                 ...prev,
-                likesCount: prev.likesCount + (data.liked ? 1 : -1)
+                likesCount: prev.likesCount + (data.liked ? 1 : -1),
+                hasLiked: data.liked
             } : null);
             // Refresh like users list
             const likesRes = await fetch(`/api/announcements/${annId}/likes`).then(r => r.json());
@@ -216,9 +218,13 @@ function AnnouncementModal({ annId, onClose }: { annId: number, onClose: () => v
 
                                 {/* Like Button in Modal */}
                                 <div className="flex items-center gap-6 py-4 border-t border-b border-gray-50 text-gray-500">
-                                    <button onClick={handleLike} disabled={liking} className="flex items-center gap-2 hover:text-red-500 transition-colors group">
-                                        <div className={`p-2 rounded-full group-hover:bg-red-50 transition-colors`}>
-                                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                    <button onClick={handleLike} disabled={liking} className={`flex items-center gap-2 transition-colors group ${ann.hasLiked ? 'text-red-500' : 'hover:text-red-500'}`}>
+                                        <div className={`p-2 rounded-full ${ann.hasLiked ? 'bg-red-50' : 'group-hover:bg-red-50'} transition-colors ${liking ? 'animate-pulse' : ''}`}>
+                                            {liking ? (
+                                                <div className="w-6 h-6 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <svg className="w-6 h-6" fill={ann.hasLiked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                            )}
                                         </div>
                                         <span className="text-xs font-bold leading-none">{ann.likesCount} いいね</span>
                                     </button>
@@ -280,9 +286,11 @@ function AnnouncementModal({ annId, onClose }: { annId: number, onClose: () => v
                             <button
                                 type="submit"
                                 disabled={!newComment.trim() || submitting}
-                                className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-sm disabled:opacity-50 transition-colors shadow-lg shadow-blue-500/10 active:scale-95 transform"
+                                className="bg-blue-600 text-white font-bold px-4 py-2 rounded-xl text-sm disabled:opacity-50 transition-colors shadow-lg shadow-blue-500/10 active:scale-95 transform min-w-[70px] flex items-center justify-center"
                             >
-                                送信
+                                {submitting ? (
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : '送信'}
                             </button>
                         </form>
                     </div>
@@ -361,6 +369,20 @@ export default function HomePage() {
         if (res.ok) {
             const data = await res.json();
             setAnnouncements(prev => prev.map(a => a.id === annId ? { ...a, hasBookmarked: data.bookmarked } : a));
+        }
+    };
+
+    const handleCardLike = async (e: React.MouseEvent, annId: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const res = await fetch(`/api/announcements/${annId}/like`, { method: 'POST' });
+        if (res.ok) {
+            const data = await res.json();
+            setAnnouncements(prev => prev.map(a => a.id === annId ? {
+                ...a,
+                likesCount: a.likesCount + (data.liked ? 1 : -1),
+                hasLiked: data.liked
+            } : a));
         }
     };
 
@@ -663,10 +685,10 @@ export default function HomePage() {
                                     {/* Reaction Footer */}
                                     <div className="p-3 border-t border-gray-100 flex items-center gap-4 text-gray-500">
                                         <button 
-                                            onClick={() => setPreviewAnnId(ann.id)}
-                                            className="flex items-center gap-1.5 cursor-pointer hover:text-red-500 transition-colors outline-none"
+                                            onClick={(e) => handleCardLike(e, ann.id)}
+                                            className={`flex items-center gap-1.5 cursor-pointer transition-colors outline-none ${ann.hasLiked ? 'text-red-500' : 'hover:text-red-500'}`}
                                         >
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                            <svg className="w-5 h-5" fill={ann.hasLiked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                                             <span className="text-xs font-bold">{ann.likesCount}</span>
                                         </button>
                                         <button 
@@ -723,7 +745,6 @@ export default function HomePage() {
                 <AnnouncementModal annId={previewAnnId} onClose={() => {
                     setPreviewAnnId(null);
                     fetchStats();
-                    window.location.reload(); // Ensure Link navigation works after modal closure
                 }} />
             )}
         </div>
