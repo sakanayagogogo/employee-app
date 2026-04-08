@@ -39,7 +39,7 @@ export default function LoginPage() {
                 <div className="relative z-10 text-center px-12 animate-slide-up">
                         <div className="flex items-center gap-6">
                             <div className="h-32 w-32 bg-white rounded-[2.5rem] p-4 flex items-center justify-center shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] border-2 border-white/10 hover:scale-105 transition-transform duration-500">
-                                <img src="/kizuna-color.svg" alt="KIZUNA Logo" className="h-full w-full object-contain" />
+                                <img src="/pwa-icon-512.png" alt="KIZUNA Logo" className="h-full w-full object-contain" />
                             </div>
                             <div className="text-left">
                                 <h1 className="text-7xl font-black text-white tracking-tighter drop-shadow-lg scale-y-110 origin-left uppercase">KIZUNA</h1>
@@ -59,7 +59,7 @@ export default function LoginPage() {
                     {/* Mobile logo */}
                     <div className="lg:hidden text-center mb-10 flex flex-row items-center justify-center gap-5">
                         <div className="h-18 w-18 bg-white rounded-2xl p-2.5 flex items-center justify-center shadow-xl border border-zinc-100">
-                            <img src="/kizuna-color.svg" alt="KIZUNA Logo" className="h-full w-full object-contain" />
+                            <img src="/pwa-icon-512.png" alt="KIZUNA Logo" className="h-full w-full object-contain" />
                         </div>
                         <h1 className="text-5xl font-black text-zinc-900 tracking-tighter uppercase">KIZUNA</h1>
                     </div>
