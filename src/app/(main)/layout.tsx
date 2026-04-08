@@ -28,7 +28,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                 <div className="flex flex-col items-center gap-2">
                     <p className="text-zinc-600 text-sm font-bold tracking-widest">読み込み中</p>
                     <div className="w-24 h-1 bg-zinc-200 rounded-full overflow-hidden relative">
-                        <div className="absolute inset-x-0 h-full bg-blue-500 animate-[loading-bar_1.5s_infinite_ease-in-out]" />
+                    <div className="absolute inset-x-0 h-full bg-emerald-500 animate-[loading-bar_1.5s_infinite_ease-in-out]" />
                     </div>
                 </div>
             </div>
@@ -70,7 +70,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     return (
         <div className="min-h-screen bg-gray-100 text-zinc-900 font-sans flex flex-col">
             {/* Blue Header */}
-            <header className="bg-[#1877F2] sticky top-0 z-40 text-white shadow-sm">
+            <header className="bg-emerald-600 sticky top-0 z-40 text-white shadow-sm">
                 <div className="hidden lg:flex max-w-[1200px] mx-auto px-4 h-14 items-center justify-between w-full">
                     <div className="flex items-center gap-8">
                         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push('/home')}>
@@ -79,7 +79,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                             </div>
                             <div className="flex flex-col leading-none">
                                 <span className="font-black text-2xl tracking-tighter text-white uppercase">KIZUNA</span>
-                                <span className="text-[9px] font-bold text-blue-100 tracking-wider">とりせん労働組合連絡システム</span>
+                                <span className="text-[9px] font-bold text-emerald-100 tracking-wider">とりせん労働組合連絡システム</span>
                             </div>
                         </div>
                     </div>
@@ -92,7 +92,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                 </svg>
                                 <span className="font-bold text-sm">お知らせ</span>
                                 {unreadCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center border-2 border-[#1877F2] shadow-sm animate-in zoom-in duration-300">
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center border-2 border-emerald-600 shadow-sm animate-in zoom-in duration-300">
                                         {unreadCount > 99 ? '99+' : unreadCount}
                                     </span>
                                 )}
@@ -103,7 +103,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                 </svg>
                                 <span className="font-bold text-sm">メール</span>
                                 {unreadInquiryCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center border-2 border-[#1877F2] shadow-sm animate-in zoom-in duration-300">
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center border-2 border-emerald-600 shadow-sm animate-in zoom-in duration-300">
                                         {unreadInquiryCount > 99 ? '99+' : unreadInquiryCount}
                                     </span>
                                 )}
@@ -133,7 +133,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                             </div>
                         </div>
                         {(user.role === 'STORE_ADMIN' || user.role === 'HQ_ADMIN') && (
-                            <a href="/admin" className="text-[11px] font-bold tracking-wider uppercase bg-white text-blue-600 px-3 py-1 rounded shadow-sm hover:bg-blue-50 transition-colors ml-2 hidden lg:block">
+                            <a href="/admin" className="text-[11px] font-bold tracking-wider uppercase bg-white text-emerald-600 px-3 py-1 rounded shadow-sm hover:bg-emerald-50 transition-colors ml-2 hidden lg:block">
                                 管理
                             </a>
                         )}
@@ -170,12 +170,12 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                             <Link href="/profile" className="absolute top-3 right-3 p-1.5 bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20 hover:bg-black/60 shadow-sm" title="プロフィール編集">
                                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                             </Link>
-                            <div className="h-24 bg-gradient-to-r from-blue-100 to-blue-200 relative overflow-hidden">
+                            <div className="h-24 bg-gradient-to-r from-emerald-100 to-emerald-200 relative overflow-hidden">
                                 {user.backgroundUrl ? (
                                     <img src={user.backgroundUrl} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
                                 ) : (
                                     <div className="absolute inset-0 opacity-40 mix-blend-multiply flex items-center justify-center overflow-hidden">
-                                        <svg className="w-full h-full text-blue-500/20 max-w-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                        <svg className="w-full h-full text-emerald-500/20 max-w-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                             <rect x="0" y="0" width="100" height="100" fill="currentColor" />
                                             <rect x="20" y="20" width="30" height="40" fill="white" opacity="0.5" />
                                             <rect x="60" y="30" width="20" height="30" fill="white" opacity="0.5" />
@@ -188,7 +188,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                                     {user.avatarUrl ? <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" /> : user.name.charAt(0)}
                                 </div>
                                 <div className="mt-2 text-left">
-                                    <h3 className="font-bold text-gray-900 text-lg hover:text-blue-600 transition-colors w-fit">
+                                    <h3 className="font-bold text-gray-900 text-lg hover:text-emerald-600 transition-colors w-fit">
                                         <Link href="/profile">{user.name}</Link>
                                     </h3>
                                     <p className="text-xs text-gray-500 mt-1">

@@ -71,13 +71,13 @@ export default function MobileNav() {
                     if (isHome) {
                         return (
                             <Link key={item.href} href={href} className="group flex flex-col items-center justify-center min-w-[72px] relative -top-4 transition-all duration-300">
-                                <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${active ? 'bg-[#1877F2] scale-110 shadow-blue-200' : 'bg-white border border-gray-100 group-hover:bg-gray-50'}`}>
+                                <div className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${active ? 'bg-emerald-600 scale-110 shadow-emerald-200' : 'bg-white border border-gray-100 group-hover:bg-gray-50'}`}>
                                     <svg className={`w-7 h-7 transition-colors duration-300 ${active ? 'text-white' : 'text-zinc-400'}`} fill={active ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 0 : 1.8}>
                                         <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
                                         <path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75v4.5a.75.75 0 01-.75.75H5.625c-1.035 0-1.875-.84-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.432z" />
                                     </svg>
                                 </div>
-                                <span className={`mt-1.5 text-[10px] font-black tracking-wide transition-colors duration-300 ${active ? 'text-[#1877F2]' : 'text-zinc-400'}`}>
+                                <span className={`mt-1.5 text-[10px] font-black tracking-wide transition-colors duration-300 ${active ? 'text-emerald-600' : 'text-zinc-400'}`}>
                                     {item.label}
                                 </span>
                             </Link>

@@ -14,10 +14,10 @@ export const metadata: Metadata = {
     manifest: "/manifest.json",
     icons: {
         icon: [
-            { url: "/pwa-icon.png?v=1" },
-            { url: "/favicon.ico?v=1", themes: "light" },
+            { url: "/pwa-icon.png?v=2" },
+            { url: "/apple-touch-icon.png?v=2" },
         ],
-        apple: "/apple-touch-icon.png?v=1",
+        apple: "/apple-touch-icon.png?v=2",
     },
     appleWebApp: {
         capable: true,

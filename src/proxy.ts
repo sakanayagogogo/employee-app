@@ -10,6 +10,9 @@ const PUBLIC_PATHS = [
     '/_next',
     '/favicon.ico',
     '/icon.png',
+    '/pwa-icon.png',
+    '/pwa-icon-512.png',
+    '/apple-touch-icon.png',
     '/manifest.json',
     '/icons/',
 ];
