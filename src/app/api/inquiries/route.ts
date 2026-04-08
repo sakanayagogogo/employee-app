@@ -10,6 +10,7 @@ const createSchema = z.object({
     destination: z.enum(['STORE', 'HEADQUARTERS']),
     category: z.enum(['労務', '業務', '教育', '人間関係', '設備', 'その他']),
     message: z.string().min(1),
+    recipientId: z.number().int().positive().optional(),
 });
 
 const listSchema = z.object({
@@ -37,9 +38,11 @@ export async function GET(request: NextRequest) {
         whereClause += ` AND i.status = $${vals.length}`;
     }
 
-    // GENERAL sees only own inquiries; STORE_ADMIN sees own store's inquiries; HQ_ADMIN sees all
+    // GENERAL sees own inquiries + inquiries directed to them
+    // STORE_ADMIN sees own store's + area inquiries + received inquiries
+    // HQ_ADMIN sees all
     if (user.role === 'GENERAL') {
-        whereClause += ` AND i.author_id = $1`;
+        whereClause += ` AND (i.author_id = $1 OR i.recipient_id = $1)`;
     } else if (user.role === 'STORE_ADMIN') {
         const { getAreaGroupId } = await import('@/lib/rbac');
         const areaGroupId = getAreaGroupId(user.unionRole);
@@ -47,10 +50,10 @@ export async function GET(request: NextRequest) {
         if (areaGroupId) {
             vals.push(user.storeId ?? -1);
             vals.push(areaGroupId);
-            whereClause += ` AND (i.store_id = $${vals.length - 1} OR EXISTS (SELECT 1 FROM stores s2 WHERE s2.id = i.store_id AND s2.group_id = $${vals.length}) OR i.author_id = $1)`;
+            whereClause += ` AND (i.store_id = $${vals.length - 1} OR EXISTS (SELECT 1 FROM stores s2 WHERE s2.id = i.store_id AND s2.group_id = $${vals.length}) OR i.author_id = $1 OR i.recipient_id = $1)`;
         } else {
             vals.push(user.storeId);
-            whereClause += ` AND (i.store_id = $${vals.length} OR i.author_id = $1)`;
+            whereClause += ` AND (i.store_id = $${vals.length} OR i.author_id = $1 OR i.recipient_id = $1)`;
         }
     }
 
@@ -63,13 +66,17 @@ export async function GET(request: NextRequest) {
         status: string; author_id: number; author_name: string;
         store_id: number | null; store_name: string | null; 
         store_group_name: string | null; assignee_name: string | null;
+        recipient_id: number | null; recipient_name: string | null;
+        recipient_employee_number: string | null;
         created_at: string; updated_at: string;
         is_read: boolean;
     }>(
         `SELECT i.id, i.title, i.category, i.destination, i.status, i.author_id,
             u.name AS author_name, i.store_id, s.name AS store_name,
             sg.name AS store_group_name,
-            a.name AS assignee_name, i.created_at, i.updated_at,
+            a.name AS assignee_name,
+            i.recipient_id, ru.name AS recipient_name, ru.employee_number AS recipient_employee_number,
+            i.created_at, i.updated_at,
             /* An inquiry is considered read if no new messages exist from OTHERS since last read */
             NOT EXISTS (
                 SELECT 1 FROM inquiry_messages m 
@@ -83,6 +90,7 @@ export async function GET(request: NextRequest) {
         LEFT JOIN stores s ON s.id = i.store_id
         LEFT JOIN store_groups sg ON sg.id = s.group_id
         LEFT JOIN users a ON a.id = i.assignee_id
+        LEFT JOIN users ru ON ru.id = i.recipient_id
         ${whereClause}
         ORDER BY i.updated_at DESC LIMIT $${limitIdx} OFFSET $${limitIdx + 1}`,
         vals
@@ -95,6 +103,8 @@ export async function GET(request: NextRequest) {
             authorId: r.author_id, authorName: r.author_name,
             storeName: r.store_name, storeGroupName: r.store_group_name,
             assigneeName: r.assignee_name,
+            recipientId: r.recipient_id, recipientName: r.recipient_name,
+            recipientEmployeeNumber: r.recipient_employee_number,
             createdAt: r.created_at, updatedAt: r.updated_at,
             isRead: r.is_read
         }))
@@ -114,13 +124,26 @@ export async function POST(request: Request) {
     const parsed = createSchema.safeParse(body);
     if (!parsed.success) return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
 
-    const { title, destination, category, message } = parsed.data;
+    const { title, destination, category, message, recipientId } = parsed.data;
+
+    // Only admins can specify a recipient
+    if (recipientId && !isAdmin(user.role)) {
+        return Response.json({ error: '宛先の指定は管理者のみ可能です' }, { status: 403 });
+    }
+
+    // Validate recipient exists if specified
+    if (recipientId) {
+        const recipient = await queryOne<{ id: number }>('SELECT id FROM users WHERE id = $1 AND is_active = TRUE', [recipientId]);
+        if (!recipient) {
+            return Response.json({ error: '指定されたユーザーが見つかりません' }, { status: 400 });
+        }
+    }
 
     const inqId = await transaction(async (client) => {
         const inqResult = await client.query(
-            `INSERT INTO inquiries (title, destination, category, author_id, store_id, status)
-             VALUES ($1, $2, $3, $4, $5, 'OPEN') RETURNING id`,
-            [title, destination, category, parseInt(user.sub), user.storeId]
+            `INSERT INTO inquiries (title, destination, category, author_id, store_id, status, recipient_id)
+             VALUES ($1, $2, $3, $4, $5, 'OPEN', $6) RETURNING id`,
+            [title, destination, category, parseInt(user.sub), user.storeId, recipientId ?? null]
         );
         const id = inqResult.rows[0].id;
 
@@ -131,10 +154,14 @@ export async function POST(request: Request) {
         return id;
     });
 
-    // Send push notification to admins (fire-and-forget)
+    // Send push notification
     try {
         let recipientIds: number[] = [];
-        if (destination === 'HEADQUARTERS') {
+
+        // If a specific recipient is set, notify only that user
+        if (recipientId) {
+            recipientIds = [recipientId];
+        } else if (destination === 'HEADQUARTERS') {
             // Notify HQ admins
             const admins = await query<{ id: number }>(`SELECT id FROM users WHERE role = 'HQ_ADMIN' AND is_active = TRUE AND id != $1`, [parseInt(user.sub)]);
             recipientIds = admins.map(a => a.id);

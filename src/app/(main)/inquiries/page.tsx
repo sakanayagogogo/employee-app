@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,9 +14,20 @@ interface Inquiry {
     authorName: string;
     storeName: string | null;
     storeGroupName: string | null;
+    recipientId: number | null;
+    recipientName: string | null;
+    recipientEmployeeNumber: string | null;
     createdAt: string;
     updatedAt: string;
     isRead: boolean;
+}
+
+interface SearchUser {
+    id: number;
+    employeeNumber: string;
+    name: string;
+    storeName: string | null;
+    role: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -28,6 +39,143 @@ const statusLabels: Record<string, string> = {
     OPEN: '未対応', IN_PROGRESS: '対応中', CLOSED: 'クローズ'
 };
 
+function RecipientPicker({
+    selectedUser,
+    onSelect,
+    onClear,
+}: {
+    selectedUser: SearchUser | null;
+    onSelect: (u: SearchUser) => void;
+    onClear: () => void;
+}) {
+    const [searchQuery, setSearchQuery] = useState('');
+    const [results, setResults] = useState<SearchUser[]>([]);
+    const [searching, setSearching] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const debounceRef = useRef<NodeJS.Timeout | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const doSearch = useCallback(async (q: string) => {
+        if (!q.trim()) {
+            setResults([]);
+            return;
+        }
+        setSearching(true);
+        try {
+            const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+            setResults(data.data ?? []);
+        } catch {
+            setResults([]);
+        } finally {
+            setSearching(false);
+        }
+    }, []);
+
+    const handleInputChange = (value: string) => {
+        setSearchQuery(value);
+        setShowDropdown(true);
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => doSearch(value), 300);
+    };
+
+    // Close dropdown on outside click
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setShowDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    if (selectedUser) {
+        return (
+            <div className="flex items-center gap-3 bg-blue-50 border-2 border-blue-200 rounded-2xl px-4 py-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm shrink-0">
+                    {selectedUser.name.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-900 text-sm truncate">{selectedUser.name}</p>
+                    <p className="text-[11px] text-gray-500 font-medium">
+                        社員コード: {selectedUser.employeeNumber} · {selectedUser.storeName ?? '本部'}
+                    </p>
+                </div>
+                <button
+                    type="button"
+                    onClick={onClear}
+                    className="w-7 h-7 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors shrink-0"
+                >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <div ref={containerRef} className="relative">
+            <div className="relative">
+                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => handleInputChange(e.target.value)}
+                    onFocus={() => searchQuery && setShowDropdown(true)}
+                    placeholder="社員コードまたは名前で検索..."
+                    className="w-full pl-12 pr-5 py-4 bg-gray-50 border-2 border-transparent focus:border-orange-500/20 focus:bg-white rounded-2xl focus:ring-0 text-gray-900 font-bold transition-all outline-none placeholder:text-gray-300"
+                />
+                {searching && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                        <div className="w-5 h-5 border-2 border-orange-400 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                )}
+            </div>
+
+            {showDropdown && (searchQuery.trim().length > 0) && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl shadow-gray-200/50 z-50 max-h-60 overflow-y-auto">
+                    {results.length === 0 ? (
+                        <div className="p-4 text-center text-gray-400 text-sm">
+                            {searching ? '検索中...' : '該当するユーザーが見つかりません'}
+                        </div>
+                    ) : (
+                        results.map((u) => (
+                            <button
+                                key={u.id}
+                                type="button"
+                                onClick={() => {
+                                    onSelect(u);
+                                    setSearchQuery('');
+                                    setShowDropdown(false);
+                                    setResults([]);
+                                }}
+                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-orange-50 transition-colors text-left border-b border-gray-50 last:border-0"
+                            >
+                                <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-sm shrink-0">
+                                    {u.name.charAt(0)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-bold text-gray-900 text-sm truncate">{u.name}</p>
+                                    <p className="text-[11px] text-gray-400 font-medium">
+                                        {u.employeeNumber} · {u.storeName ?? '本部'}
+                                    </p>
+                                </div>
+                                <svg className="w-4 h-4 text-gray-300 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
+                        ))
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function InquiriesPage() {
     const router = useRouter();
     const { user } = useAuth();
@@ -37,6 +185,7 @@ export default function InquiriesPage() {
     const [showForm, setShowForm] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [form, setForm] = useState({ title: '', destination: '', category: '', message: '' });
+    const [selectedRecipient, setSelectedRecipient] = useState<SearchUser | null>(null);
     const [formError, setFormError] = useState('');
     const [masters, setMasters] = useState<any[]>([]);
     const [filter, setFilter] = useState<'all' | 'unread'>('all');
@@ -62,16 +211,21 @@ export default function InquiriesPage() {
         e.preventDefault();
         setFormError('');
         setSubmitting(true);
+        const payload: any = { ...form };
+        if (isAdmin && selectedRecipient) {
+            payload.recipientId = selectedRecipient.id;
+        }
         const res = await fetch('/api/inquiries', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(form),
+            body: JSON.stringify(payload),
         });
         const data = await res.json();
         if (!res.ok) {
             setFormError(data.error ?? 'エラーが発生しました');
             setSubmitting(false);
         } else {
+            setSelectedRecipient(null);
             router.push(`/inquiries/${data.data.id}`);
         }
     };
@@ -130,7 +284,7 @@ export default function InquiriesPage() {
                                     </button>
                                     <button 
                                         type="button"
-                                        onClick={() => setShowForm(false)} 
+                                        onClick={() => { setShowForm(false); setSelectedRecipient(null); }} 
                                         className="w-10 h-10 flex items-center justify-center rounded-2xl bg-gray-50 text-gray-400 hover:text-gray-600 transition-colors hover:bg-gray-100"
                                     >
                                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -149,6 +303,21 @@ export default function InquiriesPage() {
                                 <input type="hidden" value={form.destination} />
                                 
                                 <div className="space-y-6">
+                                    {/* Admin: Recipient Picker */}
+                                    {isAdmin && (
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-400 mb-2 px-1 uppercase tracking-widest">
+                                                宛先
+                                                <span className="ml-2 text-[10px] font-medium text-gray-300 normal-case tracking-normal">（指定しない場合は本部管理者宛になります）</span>
+                                            </label>
+                                            <RecipientPicker
+                                                selectedUser={selectedRecipient}
+                                                onSelect={setSelectedRecipient}
+                                                onClear={() => setSelectedRecipient(null)}
+                                            />
+                                        </div>
+                                    )}
+
                                     <div>
                                         <label className="block text-sm font-bold text-gray-400 mb-2 px-1 uppercase tracking-widest">カテゴリ</label>
                                         <select
@@ -241,6 +410,16 @@ export default function InquiriesPage() {
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-xs font-black text-gray-900 bg-gray-100 px-2 py-0.5 rounded-lg">{inq.authorName}</span>
                                                     <span className="text-xs text-gray-400 font-bold">{inq.storeName ?? '-'}</span>
+                                                </div>
+                                            )}
+                                            {inq.recipientName && (
+                                                <div className="flex items-center gap-1">
+                                                    <svg className="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                    </svg>
+                                                    <span className="text-[11px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded">
+                                                        宛先: {inq.recipientName}
+                                                    </span>
                                                 </div>
                                             )}
                                             <div className="flex items-center gap-2 text-[11px] text-gray-400 font-bold">

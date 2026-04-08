@@ -17,25 +17,29 @@ export async function GET(_req: Request, { params }: Params) {
             i.store_id, s.name as store_name, s.group_id as store_group_id,
             sg.name as store_group_name,
             i.assignee_id, au.name as assignee_name,
+            i.recipient_id, ru.name as recipient_name, ru.employee_number as recipient_employee_number,
             i.created_at, i.updated_at
      FROM inquiries i
      JOIN users u ON u.id = i.author_id
      LEFT JOIN stores s ON s.id = i.store_id
      LEFT JOIN store_groups sg ON sg.id = s.group_id
      LEFT JOIN users au ON au.id = i.assignee_id
+     LEFT JOIN users ru ON ru.id = i.recipient_id
      WHERE i.id = $1`,
         [inquiryId]
     );
 
     if (!inquiry) return Response.json({ error: '相談が見つかりません' }, { status: 404 });
 
-    // Check visibility
-    if (user.role === 'GENERAL' && inquiry.author_id !== parseInt(user.sub)) {
+    // Check visibility: author, recipient, admins
+    const userId = parseInt(user.sub);
+    const isAuthorOrRecipient = inquiry.author_id === userId || inquiry.recipient_id === userId;
+    if (user.role === 'GENERAL' && !isAuthorOrRecipient) {
         return Response.json({ error: '権限がありません' }, { status: 403 });
     }
     if (user.role === 'STORE_ADMIN') {
         const { canAccessStore } = await import('@/lib/rbac');
-        if (!canAccessStore(user.role, user.storeId, inquiry.store_id as number, user.unionRole, inquiry.store_group_id as number) && inquiry.author_id !== parseInt(user.sub)) {
+        if (!canAccessStore(user.role, user.storeId, inquiry.store_id as number, user.unionRole, inquiry.store_group_id as number) && !isAuthorOrRecipient) {
             return Response.json({ error: '権限がありません' }, { status: 403 });
         }
     }
@@ -58,6 +62,8 @@ export async function GET(_req: Request, { params }: Params) {
             storeId: inquiry.store_id, storeName: inquiry.store_name,
             storeGroupName: inquiry.store_group_name,
             assigneeId: inquiry.assignee_id, assigneeName: inquiry.assignee_name,
+            recipientId: inquiry.recipient_id, recipientName: inquiry.recipient_name,
+            recipientEmployeeNumber: inquiry.recipient_employee_number,
             createdAt: inquiry.created_at, updatedAt: inquiry.updated_at,
             messages: messages.map((m) => ({
                 id: m.id, inquiryId: m.inquiry_id, authorId: m.author_id,

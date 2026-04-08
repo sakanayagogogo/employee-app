@@ -25,6 +25,9 @@ interface InquiryDetail {
     storeName: string | null;
     storeGroupName: string | null;
     assigneeName: string | null;
+    recipientId: number | null;
+    recipientName: string | null;
+    recipientEmployeeNumber: string | null;
     messages: Message[];
 }
 
@@ -98,6 +101,15 @@ export default function InquiryDetailPage({ params }: { params: Promise<{ id: st
                             <h1 className="font-bold text-gray-900">{inquiry.title}</h1>
                             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs text-gray-400">
                                 <span className="text-gray-600 font-medium">{inquiry.authorName}</span>
+                                {inquiry.recipientName && (
+                                    <>
+                                        <span className="text-gray-300">→</span>
+                                        <span className="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded font-bold flex items-center gap-1">
+                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                            {inquiry.recipientName}
+                                        </span>
+                                    </>
+                                )}
                                 <span className="text-gray-300">|</span>
                                 <span>{inquiry.storeGroupName ?? '-'}</span>
                                 <span className="text-gray-300">·</span>
