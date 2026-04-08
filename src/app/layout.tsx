@@ -13,8 +13,11 @@ export const metadata: Metadata = {
     description: "とりせん労働組合向けの連絡・エンゲージメントプラットフォーム",
     manifest: "/manifest.json",
     icons: {
-        icon: "/kizuna-color.svg",
-        apple: "/apple-touch-icon.png",
+        icon: [
+            { url: "/kizuna-color.svg?v=1" },
+            { url: "/favicon.ico?v=1", themes: "light" },
+        ],
+        apple: "/apple-touch-icon.png?v=1",
     },
     appleWebApp: {
         capable: true,
