@@ -23,7 +23,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
             <div className="min-h-screen flex items-center justify-center bg-zinc-50">
             <div className="flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-700">
                 <div className="h-28 w-28 bg-black rounded-[2.5rem] p-5 flex items-center justify-center shadow-2xl animate-pulse-gentle">
-                    <img src="/pwa-icon.png" alt="Loading KIZUNA..." className="h-full w-full object-contain animate-spin-slow" />
+                    <img src="/kizuna-color.svg" alt="Loading KIZUNA..." className="h-full w-full object-contain animate-spin-slow" />
                 </div>
                 <div className="flex flex-col items-center gap-2">
                     <p className="text-zinc-600 text-sm font-bold tracking-widest">読み込み中</p>
@@ -75,7 +75,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     <div className="flex items-center gap-8">
                         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push('/home')}>
                             <div className="h-12 w-12 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                                <img src="/pwa-icon.png" alt="" className="h-full w-full object-contain drop-shadow-md" />
+                                <img src="/kizuna-icon.svg" alt="" className="h-full w-full object-contain drop-shadow-md" />
                             </div>
                             <div className="flex flex-col leading-none">
                                 <span className="font-black text-2xl tracking-tighter text-white uppercase">KIZUNA</span>
@@ -153,7 +153,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     </div>
                     <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 cursor-pointer" onClick={() => router.push('/home')}>
                         <div className="h-10 w-10 flex items-center justify-center">
-                            <img src="/pwa-icon.png" alt="" className="h-full w-full object-contain" />
+                            <img src="/kizuna-icon.svg" alt="" className="h-full w-full object-contain" />
                         </div>
                         <span className="font-black text-xl tracking-tighter text-white uppercase">KIZUNA</span>
                     </div>
