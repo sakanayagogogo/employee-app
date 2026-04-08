@@ -15,9 +15,9 @@ export const metadata: Metadata = {
     icons: {
         icon: [
             { url: "/kizuna-icon.svg?v=2" },
-            { url: "/apple-touch-icon.png?v=2" },
+            { url: "/apple-touch-icon.png?v=3" },
         ],
-        apple: "/apple-touch-icon.png?v=2",
+        apple: "/apple-touch-icon.png?v=3",
     },
     appleWebApp: {
         capable: true,
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-    themeColor: "#ea580c",
+    themeColor: "#10b981",
     width: "device-width",
     initialScale: 1,
 };
