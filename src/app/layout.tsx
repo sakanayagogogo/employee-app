@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     manifest: "/manifest.json",
     icons: {
         icon: [
-            { url: "/kizuna-color.svg?v=1" },
+            { url: "/pwa-icon.png?v=1" },
             { url: "/favicon.ico?v=1", themes: "light" },
         ],
         apple: "/apple-touch-icon.png?v=1",
