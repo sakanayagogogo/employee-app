@@ -7,6 +7,7 @@ export async function POST() {
         'Path=/',
         'SameSite=Lax',
         'Max-Age=0',
+        ...(process.env.NODE_ENV === 'production' ? ['Secure'] : []),
     ].join('; ');
 
     return new Response(JSON.stringify({ message: 'ログアウトしました' }), {

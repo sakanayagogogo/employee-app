@@ -18,7 +18,9 @@ function createPool(): Pool {
     }
     return new Pool({
         connectionString,
-        ssl: process.env.DATABASE_SSL === 'false' ? false : { rejectUnauthorized: false },
+        ssl: process.env.DATABASE_SSL === 'false' ? false : { 
+            rejectUnauthorized: process.env.DATABASE_REJECT_UNAUTHORIZED === 'true' 
+        },
         max: 10,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 15000,

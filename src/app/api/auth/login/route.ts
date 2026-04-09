@@ -19,6 +19,20 @@ export async function POST(request: Request) {
 
         const { employeeNumber, password } = parsed.data;
 
+        // --- Basic Rate Limiting Check ---
+        const recentFailures = await queryOne<{ count: string }>(
+            `SELECT COUNT(*) as count FROM audit_logs 
+             WHERE action = 'LOGIN_FAILURE' 
+             AND ip_address = $1 
+             AND created_at > NOW() - INTERVAL '10 minutes'`,
+            [request.headers.get('x-forwarded-for') || '0.0.0.0']
+        );
+
+        if (parseInt(recentFailures?.count || '0') >= 5) {
+            return Response.json({ error: '続けてログインに失敗したため、一時的に制限されています。10分後にお試しください。' }, { status: 429 });
+        }
+        // ---------------------------------
+
         const user = await queryOne<any>(
             `SELECT u.*, s.name as store_name, sg.name as group_name, s.group_id
              FROM users u
@@ -29,6 +43,7 @@ export async function POST(request: Request) {
         );
 
         if (!user) {
+            await logAudit({ employeeNumber }, 'LOGIN_FAILURE', 'users', null, { reason: 'user_not_found' });
             return Response.json({ error: '社員番号またはパスワードが正しくありません' }, { status: 401 });
         }
 
@@ -38,6 +53,7 @@ export async function POST(request: Request) {
 
         const valid = await verifyPassword(password, user.password_hash);
         if (!valid) {
+            await logAudit({ employeeNumber, id: user.id }, 'LOGIN_FAILURE', 'users', user.id, { reason: 'invalid_password' });
             return Response.json({ error: '社員番号またはパスワードが正しくありません' }, { status: 401 });
         }
 

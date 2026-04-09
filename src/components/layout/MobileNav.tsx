@@ -66,7 +66,9 @@ export default function MobileNav() {
                     const isAnnouncements = item.href === '/announcements';
                     const isInquiries = item.href === '/inquiries';
                     const href = item.href;
-                    const active = isMenu ? pathname.startsWith('/menu') : pathname === item.href || pathname.startsWith(item.href + '/');
+                    const active = isMenu 
+                        ? pathname.startsWith('/menu') 
+                        : pathname === item.href.split('?')[0] || pathname.startsWith(item.href.split('?')[0] + '/');
 
                     if (isHome) {
                         return (
@@ -91,12 +93,12 @@ export default function MobileNav() {
                                     {item.icon(active)}
                                 </div>
                                 {isAnnouncements && unreadCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white shadow-sm ring-1 ring-red-200">
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center shadow-sm ring-1 ring-red-200">
                                         {unreadCount > 99 ? '99+' : unreadCount}
                                     </span>
                                 )}
                                 {isInquiries && unreadInquiryCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center border-2 border-white shadow-sm ring-1 ring-red-200">
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center shadow-sm ring-1 ring-red-200">
                                         {unreadInquiryCount > 99 ? '99+' : unreadInquiryCount}
                                     </span>
                                 )}

@@ -55,7 +55,8 @@ export async function GET(request: NextRequest) {
         
         targetClause = `
         AND (
-            EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'ALL')
+            a.category = 'PRESIDENT'
+            OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'ALL')
             OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'USER' AND target_value = $2::text)
             OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'STORE' AND target_value = $3::text)
             OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'STORE_GROUP' AND target_value = $4::text)
@@ -123,7 +124,7 @@ export async function GET(request: NextRequest) {
         });
     } catch (e: any) {
         console.error('[GET Announcements] Error:', e);
-        return Response.json({ error: `お知らせの取得に失敗しました: ${e.message}` }, { status: 500 });
+        return Response.json({ error: 'お知らせの取得に失敗しました' }, { status: 500 });
     }
 }
 

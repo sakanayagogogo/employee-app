@@ -15,9 +15,9 @@ export const metadata: Metadata = {
     icons: {
         icon: [
             { url: "/kizuna-icon.svg?v=2" },
-            { url: "/apple-touch-icon.png?v=3" },
+            { url: "/apple-touch-icon.png?v=4" },
         ],
-        apple: "/apple-touch-icon.png?v=3",
+        apple: "/apple-touch-icon.png?v=4",
     },
     appleWebApp: {
         capable: true,

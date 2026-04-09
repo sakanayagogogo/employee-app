@@ -39,10 +39,10 @@ export async function POST(request: Request) {
         const nextOrder = (maxOrder?.max ?? -1) + 1;
 
         const widget = await queryOne<{ id: number }>(
-            `INSERT INTO portal_widgets (type, title, config_json, size, sort_order, is_published, expires_at, category_name, show_in_header)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            `INSERT INTO portal_widgets (type, title, config_json, size, sort_order, is_published, expires_at, category_name, show_in_header, store_id)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
              RETURNING id`,
-            [type, title, JSON.stringify(configJson), size, nextOrder, isPublished, expiresAt ?? null, categoryName ?? null, showInHeader]
+            [type, title, JSON.stringify(configJson), size, nextOrder, isPublished, expiresAt ?? null, categoryName ?? null, showInHeader, user.role === 'HQ_ADMIN' ? null : user.storeId]
         );
 
         if (widget) {

@@ -638,10 +638,10 @@ export default function HomePage() {
                                         </div>
                                         <button 
                                             onClick={(e) => handleCardBookmark(e, ann.id)}
-                                            className={`p-2 rounded-full transition-all active:scale-90 ${ann.hasBookmarked ? 'text-orange-500 bg-orange-50' : 'text-gray-300 hover:bg-gray-50 hover:text-orange-400'}`}
+                                            className={`transition-all active:scale-90 ${ann.hasBookmarked ? 'text-orange-500' : 'text-gray-300 hover:text-orange-400'}`}
                                             title={ann.hasBookmarked ? "しおりを外す" : "しおりを挟む"}
                                         >
-                                            <svg className="w-5 h-5" fill={ann.hasBookmarked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <svg className="w-6 h-6" fill={ann.hasBookmarked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                             </svg>
                                         </button>
