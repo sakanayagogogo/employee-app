@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         );
 
         if (!user) {
-            await logAudit({ employeeNumber }, 'LOGIN_FAILURE', 'users', null, { reason: 'user_not_found' });
+            await logAudit(null, 'LOGIN_FAILURE', 'users', null, { employeeNumber, reason: 'user_not_found' });
             return Response.json({ error: '社員番号またはパスワードが正しくありません' }, { status: 401 });
         }
 
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
         const valid = await verifyPassword(password, user.password_hash);
         if (!valid) {
-            await logAudit({ employeeNumber, id: user.id }, 'LOGIN_FAILURE', 'users', user.id, { reason: 'invalid_password' });
+            await logAudit(null, 'LOGIN_FAILURE', 'users', user.id, { employeeNumber, id: user.id, reason: 'invalid_password' });
             return Response.json({ error: '社員番号またはパスワードが正しくありません' }, { status: 401 });
         }
 
