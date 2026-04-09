@@ -4,10 +4,10 @@ import type { JWTPayload } from '@/types';
 export async function logAudit(
     actor: JWTPayload | null,
     action: string,
-    entityType?: string,
-    entityId?: number,
+    entityType?: string | null,
+    entityId?: number | null,
     detail?: Record<string, unknown>,
-    ipAddress?: string
+    ipAddress?: string | null
 ) {
     try {
         await query(
