@@ -66,9 +66,10 @@ export default function MobileNav() {
                     const isAnnouncements = item.href === '/announcements';
                     const isInquiries = item.href === '/inquiries';
                     const href = item.href;
+                    const baseHref = item.href.split('?')[0];
                     const active = isMenu 
                         ? pathname.startsWith('/menu') 
-                        : pathname === item.href.split('?')[0] || pathname.startsWith(item.href.split('?')[0] + '/');
+                        : pathname === baseHref || pathname.startsWith(baseHref + '/');
 
                     if (isHome) {
                         return (
