@@ -11,13 +11,13 @@ const geist = Geist({
 export const metadata: Metadata = {
     title: "KIZUNA - とりせん労働組合連絡システム",
     description: "とりせん労働組合向けの連絡・エンゲージメントプラットフォーム",
-    manifest: "/manifest.json",
+    manifest: "/manifest.json?v=5",
     icons: {
         icon: [
-            { url: "/kizuna-icon.svg?v=2" },
-            { url: "/apple-touch-icon.png?v=4" },
+            { url: "/kizuna-color.svg?v=5" },
+            { url: "/favicon.ico?v=5" },
         ],
-        apple: "/apple-touch-icon.png?v=4",
+        apple: "/apple-touch-icon-color.png?v=5",
     },
     appleWebApp: {
         capable: true,
