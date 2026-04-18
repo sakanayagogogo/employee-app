@@ -182,6 +182,23 @@ export async function GET() {
             WHERE i.status IN ('OPEN', 'IN_PROGRESS') AND ${inquiryFilterSql}
             ORDER BY i.created_at DESC
             LIMIT 5
+        `, filterVals),
+        loginLogs: await query<{ id: number, action: string, user_name: string | null, employee_number: string | null, store_name: string | null, detail_json: any, created_at: string }>(`
+            SELECT 
+                al.id, 
+                al.action, 
+                u.name as user_name, 
+                COALESCE(u.employee_number, al.detail_json->>'employeeNumber') as employee_number,
+                s.name as store_name,
+                al.detail_json, 
+                al.created_at
+            FROM audit_logs al
+            LEFT JOIN users u ON al.actor_user_id = u.id
+            LEFT JOIN stores s ON u.store_id = s.id
+            WHERE al.action IN ('USER_LOGIN', 'LOGIN_FAILURE')
+            AND (${isHQ ? '1=1' : `(u.store_id = $1 OR EXISTS (SELECT 1 FROM stores s2 WHERE s2.id = u.store_id AND s2.group_id = $2) OR (al.detail_json->>'employeeNumber' IN (SELECT employee_number FROM users u2 WHERE u2.store_id = $1 OR EXISTS (SELECT 1 FROM stores s3 WHERE s3.id = u2.store_id AND s3.group_id = $2))))`})
+            ORDER BY al.created_at DESC
+            LIMIT 10
         `, filterVals)
     });
 }
