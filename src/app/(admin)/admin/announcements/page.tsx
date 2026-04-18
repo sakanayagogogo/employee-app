@@ -379,7 +379,7 @@ export default function AdminAnnouncementsPage() {
 
                                     {groups.length > 0 && (
                                         <div className="space-y-1">
-                                            <p className="text-[10px] uppercase font-bold text-gray-400 ml-1">店舗グループ別</p>
+                                            <p className="text-[10px] uppercase font-bold text-gray-400 ml-1">店舗グループ（エリア）別</p>
                                             <div className="flex flex-wrap gap-2">
                                                 {groups.map(g => (
                                                      <button key={g.id} type="button"
@@ -392,13 +392,74 @@ export default function AdminAnnouncementsPage() {
                                                                      : [...form.targets.filter(t => t.targetType !== 'ALL'), { targetType: 'STORE_GROUP', targetValue: val }]
                                                              });
                                                          }}
-                                                         className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${form.targets.some(t => t.targetType === 'STORE_GROUP' && t.targetValue === String(g.id)) ? 'bg-orange-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
+                                                         className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${form.targets.some(t => t.targetType === 'STORE_GROUP' && t.targetValue === String(g.id)) ? 'bg-orange-600 text-white shadow-sm' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'}`}>
                                                          {g.name}
                                                      </button>
                                                 ))}
                                             </div>
                                         </div>
                                     )}
+
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] uppercase font-bold text-gray-400 ml-1">雇用区分別</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {masters.filter(m => m.category === 'employment_type').map(m => (
+                                                    <button key={m.code} type="button"
+                                                        onClick={() => {
+                                                            const val = String(m.code);
+                                                            const existing = form.targets.some(t => t.targetType === 'EMPLOYMENT_TYPE' && t.targetValue === val);
+                                                            setForm({
+                                                                ...form, targets: existing
+                                                                    ? form.targets.filter(t => !(t.targetType === 'EMPLOYMENT_TYPE' && t.targetValue === val))
+                                                                    : [...form.targets.filter(t => t.targetType !== 'ALL'), { targetType: 'EMPLOYMENT_TYPE', targetValue: val }]
+                                                            });
+                                                        }}
+                                                        className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${form.targets.some(t => t.targetType === 'EMPLOYMENT_TYPE' && t.targetValue === String(m.code)) ? 'bg-orange-600 text-white shadow-sm' : 'bg-blue-50 text-blue-700 hover:bg-blue-100'}`}>
+                                                        {m.name}
+                                                    </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] uppercase font-bold text-gray-400 ml-1">役員区分別</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {masters.filter(m => m.category === 'union_role').map(m => (
+                                                    <button key={m.code} type="button"
+                                                        onClick={() => {
+                                                            const val = String(m.code);
+                                                            const existing = form.targets.some(t => t.targetType === 'UNION_ROLE' && t.targetValue === val);
+                                                            setForm({
+                                                                ...form, targets: existing
+                                                                    ? form.targets.filter(t => !(t.targetType === 'UNION_ROLE' && t.targetValue === val))
+                                                                    : [...form.targets.filter(t => t.targetType !== 'ALL'), { targetType: 'UNION_ROLE', targetValue: val }]
+                                                            });
+                                                        }}
+                                                        className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${form.targets.some(t => t.targetType === 'UNION_ROLE' && t.targetValue === String(m.code)) ? 'bg-orange-600 text-white shadow-sm' : 'bg-purple-50 text-purple-700 hover:bg-purple-100'}`}>
+                                                        {m.name}
+                                                    </button>
+                                            ))}
+                                        </div>
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] uppercase font-bold text-gray-400 ml-1">支部役割別</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {masters.filter(m => m.category === 'branch_officer').map(m => (
+                                                    <button key={m.code} type="button"
+                                                        onClick={() => {
+                                                            const val = String(m.code);
+                                                            const existing = form.targets.some(t => t.targetType === 'BRANCH_OFFICER' && t.targetValue === val);
+                                                            setForm({
+                                                                ...form, targets: existing
+                                                                    ? form.targets.filter(t => !(t.targetType === 'BRANCH_OFFICER' && t.targetValue === val))
+                                                                    : [...form.targets.filter(t => t.targetType !== 'ALL'), { targetType: 'BRANCH_OFFICER', targetValue: val }]
+                                                            });
+                                                        }}
+                                                        className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${form.targets.some(t => t.targetType === 'BRANCH_OFFICER' && t.targetValue === String(m.code)) ? 'bg-orange-600 text-white shadow-sm' : 'bg-pink-50 text-pink-700 hover:bg-pink-100'}`}>
+                                                        {m.name}
+                                                    </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div>

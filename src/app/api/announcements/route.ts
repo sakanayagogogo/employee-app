@@ -20,7 +20,7 @@ const createSchema = z.object({
         url: z.string().url(),
     })).optional().default([]),
     targets: z.array(z.object({
-        targetType: z.enum(['ALL', 'STORE', 'STORE_GROUP', 'EMPLOYMENT_TYPE', 'UNION_ROLE', 'USER']),
+        targetType: z.enum(['ALL', 'STORE', 'STORE_GROUP', 'EMPLOYMENT_TYPE', 'UNION_ROLE', 'BRANCH_OFFICER', 'USER']),
         targetValue: z.string().nullish(),
     })).min(1),
     widgetIds: z.array(z.number()).optional().default([]),
@@ -46,12 +46,14 @@ export async function GET(request: NextRequest) {
         const groupIdStr = String(user.groupId || '');
         const empTypeStr = String(user.employmentType);
         const uRoleStr = String(user.unionRole || '');
+        const branchOfficerStr = String(user.unionRoleBranch || '');
         
         vals.push(userIdStr);  // $2
         vals.push(storeIdStr); // $3
         vals.push(groupIdStr); // $4
         vals.push(empTypeStr); // $5
         vals.push(uRoleStr);   // $6
+        vals.push(branchOfficerStr); // $7
         
         targetClause = `
         AND (
@@ -62,6 +64,7 @@ export async function GET(request: NextRequest) {
             OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'STORE_GROUP' AND target_value = $4::text)
             OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'EMPLOYMENT_TYPE' AND target_value = $5::text)
             OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'UNION_ROLE' AND target_value = $6::text)
+            OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'BRANCH_OFFICER' AND target_value = $7::text)
         )`;
     }
 
