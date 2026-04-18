@@ -43,6 +43,15 @@ interface Stats {
     widgetsByType: StatItem[];
     totalWidgetResponses: number;
     recentFormSubmissions: FormSubmission[];
+    loginLogs: {
+        id: number;
+        action: string;
+        user_name: string | null;
+        employee_number: string | null;
+        store_name: string | null;
+        detail_json: any;
+        created_at: string;
+    }[];
 }
 
 export default function AdminDashboard() {
@@ -456,10 +465,8 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
-                {/* Info Panel */}
-                <div className="space-y-4">
-                    <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest px-1">コンテンツ概況</h2>
-                    <div className="bg-zinc-900 rounded-[40px] p-8 text-white shadow-2xl relative overflow-hidden min-h-[400px] flex flex-col justify-between">
+                    {/* Info Panel */}
+                    <div className="bg-zinc-900 rounded-[40px] p-8 text-white shadow-2xl relative overflow-hidden min-h-[300px] flex flex-col justify-between">
                         <div className="relative z-10">
                             <div className="flex items-center gap-2 mb-8">
                                 <div className="p-2 bg-white/10 rounded-xl backdrop-blur-sm border border-white/10">
@@ -471,7 +478,7 @@ export default function AdminDashboard() {
                             </div>
                             
                             <p className="text-zinc-500 text-xs font-bold mb-1 tracking-wider">総お知らせ配信数</p>
-                            <p className="text-5xl font-black mb-10 tracking-tighter">
+                            <p className="text-4xl font-black mb-6 tracking-tighter">
                                 {loading ? '...' : stats?.totalAnnouncements}
                                 <span className="text-sm font-medium text-zinc-600 ml-3">件</span>
                             </p>
@@ -487,16 +494,57 @@ export default function AdminDashboard() {
                             </div>
                         </div>
 
-                        <div className="relative z-10 bg-emerald-500 rounded-2xl p-4 text-emerald-950">
-                            <p className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1 text-center">運営のアドバイス</p>
-                            <p className="text-xs font-bold leading-relaxed text-center">
-                                現場の声に迅速に対応することで、社内のエンゲージメントは向上します。未対応の相談を確認しましょう。
-                            </p>
-                        </div>
-
                         {/* Decorative background elements */}
                         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -mr-32 -mt-32" />
                         <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-[80px] -ml-24 -mb-24" />
+                    </div>
+
+                    {/* Login Logs Panel */}
+                    <div className="bg-white rounded-[2.5rem] border border-gray-100 p-8 shadow-sm overflow-hidden min-h-[400px]">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest">ログイン履歴</h2>
+                            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                        </div>
+
+                        <div className="space-y-4">
+                            {loading ? (
+                                [1, 2, 3, 4, 5].map(i => <div key={i} className="h-12 bg-gray-50 rounded-2xl animate-pulse" />)
+                            ) : stats?.loginLogs?.map((log) => (
+                                <div key={log.id} className="group relative flex items-center gap-4 p-3 rounded-2xl bg-gray-50/50 hover:bg-gray-100/50 transition-colors border border-transparent">
+                                    <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
+                                        log.action === 'USER_LOGIN' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
+                                    }`}>
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            {log.action === 'USER_LOGIN' ? (
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                                            ) : (
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                            )}
+                                        </svg>
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center justify-between gap-2 mb-0.5">
+                                            <p className="text-xs font-black text-gray-900 truncate">
+                                                {log.user_name || '不明なユーザー'}
+                                            </p>
+                                            <span className="shrink-0 text-[9px] font-bold text-gray-400">
+                                                {new Date(log.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                        <p className="text-[10px] font-bold text-gray-400 truncate flex items-center gap-1">
+                                            <span className="bg-gray-200/50 px-1 rounded text-[8px] uppercase">{log.employee_number || '---'}</span>
+                                            {log.store_name && <span className="truncate">@{log.store_name}</span>}
+                                            {log.action === 'LOGIN_FAILURE' && <span className="text-red-500 font-black">LOGIN FAIL</span>}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                            {!loading && (!stats?.loginLogs || stats.loginLogs.length === 0) && (
+                                <div className="text-center py-10">
+                                    <p className="text-xs font-bold text-gray-300">履歴はありません</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
