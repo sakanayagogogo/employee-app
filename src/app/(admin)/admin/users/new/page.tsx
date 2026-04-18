@@ -154,6 +154,35 @@ export default function NewUserPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">雇用区分</label>
+                            <select 
+                                value={form.employmentType} 
+                                onChange={e => setForm({ ...form, employmentType: e.target.value })} 
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900"
+                            >
+                                {masters.filter(m => m.category === 'employment_type').map(m => (
+                                    <option key={m.code} value={m.code}>{m.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">役員区分</label>
+                            <select 
+                                value={form.unionRole} 
+                                onChange={e => setForm({ ...form, unionRole: e.target.value })} 
+                                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900"
+                                required
+                            >
+                                <option value="">選択してください</option>
+                                {masters.filter(m => m.category === 'union_role').map(m => (
+                                    <option key={m.code} value={m.code}>{m.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
                             <label className="block text-sm font-bold text-gray-700 mb-2">職務</label>
                             <select 
                                 value={form.jobTitle} 
@@ -167,15 +196,31 @@ export default function NewUserPage() {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2">所属店舗</label>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">支部役割</label>
                             <select 
-                                value={form.storeId} 
-                                onChange={e => setForm({ ...form, storeId: e.target.value })} 
+                                value={form.unionRoleBranch} 
+                                onChange={e => setForm({ ...form, unionRoleBranch: e.target.value })} 
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900"
                             >
-                                <option value="">選択なし（本部等）</option>
-                                {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                <option value="">なし</option>
+                                {masters.filter(m => m.category === 'branch_officer').map(m => (
+                                    <option key={m.code} value={m.code}>{m.name}</option>
+                                ))}
                             </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className="sm:col-start-2">
+                             <label className="block text-sm font-bold text-gray-700 mb-2">所属店舗</label>
+                             <select 
+                                 value={form.storeId} 
+                                 onChange={e => setForm({ ...form, storeId: e.target.value })} 
+                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900"
+                             >
+                                 <option value="">選択なし（本部等）</option>
+                                 {stores.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                             </select>
                         </div>
                     </div>
 

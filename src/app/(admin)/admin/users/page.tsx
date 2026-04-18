@@ -343,23 +343,56 @@ export default function AdminUsersPage() {
                 </div>
 
                 {/* Search & Filters */}
-                <div className="space-y-3">
+                <div className="space-y-4">
                     <form onSubmit={handleSearch} className="flex gap-2">
                         <input
                             type="text" value={search} onChange={e => setSearch(e.target.value)}
                             placeholder="社員番号・氏名で検索"
-                            className="flex-1 px-4 py-3 bg-white border border-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 shadow-sm"
+                            className="flex-1 px-4 py-3 bg-white border border-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 shadow-sm transition-all"
                         />
-                        <button type="submit" className="px-6 py-3 bg-gray-900 text-white rounded-2xl text-sm font-bold hover:bg-gray-800 transition-colors">検索</button>
+                        <button type="submit" className="px-6 py-3 bg-gray-900 text-white rounded-2xl text-sm font-bold hover:bg-gray-800 transition-all shadow-md active:scale-95">検索</button>
                     </form>
                     
-                    <div className="flex gap-3">
-                        {selectedBranchOfficer && (
+                    <div className="flex flex-wrap gap-2">
+                        <select 
+                            value={selectedEmploymentType} 
+                            onChange={e => setSelectedEmploymentType(e.target.value)}
+                            className="px-4 py-2 bg-white border border-gray-100 rounded-xl text-xs font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm"
+                        >
+                            <option value="">雇用区分: 全て</option>
+                            {masters.filter(m => m.category === 'employment_type').map(m => (
+                                <option key={m.code} value={m.code}>{m.name}</option>
+                            ))}
+                        </select>
+
+                        <select 
+                            value={selectedUnionRole} 
+                            onChange={e => setSelectedUnionRole(e.target.value)}
+                            className="px-4 py-2 bg-white border border-gray-100 rounded-xl text-xs font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm"
+                        >
+                            <option value="">役員区分: 全て</option>
+                            {masters.filter(m => m.category === 'union_role').map(m => (
+                                <option key={m.code} value={m.code}>{m.name}</option>
+                            ))}
+                        </select>
+
+                        <select 
+                            value={selectedBranchOfficer} 
+                            onChange={e => setSelectedBranchOfficer(e.target.value)}
+                            className="px-4 py-2 bg-white border border-gray-100 rounded-xl text-xs font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-sm"
+                        >
+                            <option value="">支部役員: 全て</option>
+                            {masters.filter(m => m.category === 'branch_officer').map(m => (
+                                <option key={m.code} value={m.code}>{m.name}</option>
+                            ))}
+                        </select>
+
+                        {(selectedUnionRole || selectedBranchOfficer || selectedEmploymentType) && (
                             <button 
-                                onClick={() => { setLoading(true); setSelectedUnionRole(''); setSelectedBranchOfficer(''); setSelectedEmploymentType(''); }}
-                                className="text-[10px] font-bold text-gray-400 hover:text-orange-600 transition-colors"
+                                onClick={() => { setSelectedUnionRole(''); setSelectedBranchOfficer(''); setSelectedEmploymentType(''); }}
+                                className="px-4 py-2 text-[10px] font-bold text-orange-600 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors"
                             >
-                                ✕ リセット
+                                ✕ フィルター解除
                             </button>
                         )}
                     </div>
@@ -429,15 +462,24 @@ export default function AdminUsersPage() {
                                                 <div className="text-xs font-bold text-gray-900 leading-tight">
                                                     {u.jobTitle ? (masters.find(m => m.category === 'job_title' && String(m.code) === String(u.jobTitle))?.name || u.jobTitle) : '職務なし'}
                                                 </div>
-                                                <div className="flex flex-wrap gap-1">
+                                                <div className="flex flex-wrap gap-1 items-center">
+                                                    <span className="inline-flex px-1.5 py-0.5 rounded bg-gray-100 text-[9px] text-gray-500 font-bold border border-gray-200">
+                                                        {masters.find(m => m.category === 'employment_type' && String(m.code) === String(u.employmentType))?.name || u.employmentType}
+                                                    </span>
+                                                    <span className="inline-flex px-1.5 py-0.5 rounded bg-orange-50 text-[9px] text-orange-600 font-bold border border-orange-100">
+                                                        {masters.find(m => m.category === 'union_role' && String(m.code) === String(u.unionRole))?.name || u.unionRole}
+                                                    </span>
+                                                    {u.unionRoleBranch && (
+                                                        <span className="inline-flex px-1.5 py-0.5 rounded bg-purple-50 text-[9px] text-purple-600 font-bold border border-purple-100">
+                                                            {masters.find(m => m.category === 'branch_officer' && String(m.code) === String(u.unionRoleBranch))?.name || u.unionRoleBranch}
+                                                        </span>
+                                                    )}
                                                     {u.isNonUnion ? (
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-white gap-1 transition-all">
-                                                            <span className="w-1 h-1 rounded-full bg-white/50"></span>
+                                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-zinc-800 text-white gap-1">
                                                             非組合員
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 gap-1 border border-blue-200 transition-all shadow-sm">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-blue-100 text-blue-700 gap-1 border border-blue-200">
                                                             組合員
                                                         </span>
                                                     )}
