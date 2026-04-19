@@ -465,6 +465,10 @@ export default function AdminDashboard() {
                     </div>
                 </div>
 
+                {/* Sidebar Column */}
+                <div className="space-y-4">
+                    <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest px-1">コンテンツ概況</h2>
+                    
                     {/* Info Panel */}
                     <div className="bg-zinc-900 rounded-[40px] p-8 text-white shadow-2xl relative overflow-hidden min-h-[300px] flex flex-col justify-between">
                         <div className="relative z-10">
@@ -546,6 +550,7 @@ export default function AdminDashboard() {
                             )}
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
