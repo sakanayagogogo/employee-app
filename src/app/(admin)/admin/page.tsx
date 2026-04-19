@@ -532,7 +532,7 @@ export default function AdminDashboard() {
                                                 {log.user_name || '不明なユーザー'}
                                             </p>
                                             <span className="shrink-0 text-[9px] font-bold text-gray-400">
-                                                {new Date(log.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                                                {new Date(log.created_at).toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                             </span>
                                         </div>
                                         <p className="text-[10px] font-bold text-gray-400 truncate flex items-center gap-1">
