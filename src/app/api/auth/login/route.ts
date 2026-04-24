@@ -18,6 +18,7 @@ export async function POST(request: Request) {
         if (!parsed.success) return Response.json({ error: '必須項目が不足しています' }, { status: 400 });
 
         const { employeeNumber, password } = parsed.data;
+        const ip = request.headers.get('x-forwarded-for') || '0.0.0.0';
 
         // --- Basic Rate Limiting Check ---
         const recentFailures = await queryOne<{ count: string }>(
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
              WHERE action = 'LOGIN_FAILURE' 
              AND ip_address = $1 
              AND created_at > NOW() - INTERVAL '10 minutes'`,
-            [request.headers.get('x-forwarded-for') || '0.0.0.0']
+            [ip]
         );
 
         if (parseInt(recentFailures?.count || '0') >= 5) {
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
         );
 
         if (!user) {
-            await logAudit(null, 'LOGIN_FAILURE', 'users', null, { employeeNumber, reason: 'user_not_found' });
+            await logAudit(null, 'LOGIN_FAILURE', 'users', null, { employeeNumber, reason: 'user_not_found' }, ip);
             return Response.json({ error: '社員番号またはパスワードが正しくありません' }, { status: 401 });
         }
 
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
 
         const valid = await verifyPassword(password, user.password_hash);
         if (!valid) {
-            await logAudit(null, 'LOGIN_FAILURE', 'users', user.id, { employeeNumber, id: user.id, reason: 'invalid_password' });
+            await logAudit(null, 'LOGIN_FAILURE', 'users', user.id, { employeeNumber, id: user.id, reason: 'invalid_password' }, ip);
             return Response.json({ error: '社員番号またはパスワードが正しくありません' }, { status: 401 });
         }
 
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
         // Update last login
         await query(`UPDATE users SET last_login_at = NOW() WHERE id = $1`, [user.id]);
 
-        await logAudit(payload, 'USER_LOGIN', 'users', user.id, {});
+        await logAudit(payload, 'USER_LOGIN', 'users', user.id, {}, ip);
 
         // Set cookie via Response header
         const isProd = process.env.NODE_ENV === 'production';
