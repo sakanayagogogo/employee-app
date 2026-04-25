@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { getRelativeTime } from '@/lib/date';
 import TimelineGallery, { isImage } from '@/components/TimelineGallery';
+import { getProxyUrl } from '@/lib/image';
 
 interface Announcement {
     id: number;
@@ -260,7 +261,7 @@ export default function AnnouncementDetailPage({ params }: { params: Promise<{ i
                                     </div>
                                 </div>
                                 <a 
-                                    href={pdf.url} 
+                                    href={getProxyUrl(pdf.url)} 
                                     target="_blank" 
                                     rel="noopener noreferrer" 
                                     className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-xs font-black border border-white/10 flex items-center gap-2"
@@ -271,7 +272,7 @@ export default function AnnouncementDetailPage({ params }: { params: Promise<{ i
                             </div>
                             <div className="relative aspect-[1/1.414] w-full bg-white sm:h-[1000px]">
                                 <iframe 
-                                    src={`${pdf.url}#toolbar=0&navpanes=0`} 
+                                    src={`${getProxyUrl(pdf.url)}#toolbar=0&navpanes=0`} 
                                     className="absolute inset-0 w-full h-full border-none"
                                     title="PDF Viewer"
                                 />
@@ -383,7 +384,7 @@ export default function AnnouncementDetailPage({ params }: { params: Promise<{ i
                         comments.map(c => (
                             <div key={c.id} className="flex gap-3">
                                 <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0 overflow-hidden text-xs font-bold text-gray-400">
-                                    {c.avatarUrl ? <img src={c.avatarUrl} alt="Avatar" className="w-full h-full object-cover" /> : c.userName.charAt(0)}
+                                    {c.avatarUrl ? <img src={getProxyUrl(c.avatarUrl)} alt="Avatar" className="w-full h-full object-cover" /> : c.userName.charAt(0)}
                                 </div>
                                 <div>
                                     <div className="flex items-center gap-2 mb-0.5">

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
+import { getProxyUrl } from '@/lib/image';
 
 // PHP Upload Configuration
 const UPLOAD_API_URL = 'https://t-union.jp/upload.php'; // 実際のURLに書き換えてください
@@ -94,9 +95,13 @@ export default function AdminAnnouncementsPage() {
         const formData = new FormData();
         formData.append('image', file);
 
+        const auth = btoa('t-union:union2656');
         const res = await fetch(UPLOAD_API_URL, {
             method: 'POST',
-            headers: { 'X-API-KEY': UPLOAD_API_KEY },
+            headers: { 
+                'X-API-KEY': UPLOAD_API_KEY,
+                'Authorization': `Basic ${auth}`
+            },
             body: formData,
         });
         const data = await res.json();
@@ -285,7 +290,7 @@ export default function AdminAnnouncementsPage() {
                                 </div>
                                 {form.coverImageUrl && (
                                     <div className="mt-2 relative w-32 h-20 rounded-lg overflow-hidden border border-gray-200 group">
-                                        <img src={form.coverImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                                        <img src={getProxyUrl(form.coverImageUrl)} alt="Preview" className="w-full h-full object-cover" />
                                         <button type="button" onClick={() => setForm({ ...form, coverImageUrl: '' })} className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">✕</button>
                                     </div>
                                 )}

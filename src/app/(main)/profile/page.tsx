@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import NotificationSettings from '@/components/push/NotificationSettings';
+import { getProxyUrl } from '@/lib/image';
 
 export default function ProfileDashboardPage() {
     const { user, refresh, logout } = useAuth();
@@ -204,7 +205,7 @@ export default function ProfileDashboardPage() {
                         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden w-full max-w-[320px] mx-auto lg:mx-0 transition-all duration-300 hover:shadow-md">
                             <div className="h-[120px] bg-gradient-to-r from-blue-100 to-blue-200 relative overflow-hidden">
                                 {backgroundUrl ? (
-                                    <img src={backgroundUrl} alt="Cover Preview" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                    <img src={getProxyUrl(backgroundUrl)} alt="Cover Preview" className="absolute inset-0 w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                                 ) : (
                                     <div className="absolute inset-0 opacity-40 mix-blend-multiply flex items-center justify-center">
                                         <svg className="w-full h-full text-blue-500/20 max-w-none" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -218,7 +219,7 @@ export default function ProfileDashboardPage() {
                             <div className="px-5 pb-6 relative pt-14">
                                 <div className="w-20 h-20 rounded-full border-[5px] border-white bg-gray-100 flex items-center justify-center shadow-sm absolute -top-10 left-5 text-2xl font-bold text-gray-400 overflow-hidden z-10 transition-transform hover:scale-105 duration-300">
                                     {avatarUrl ? (
-                                        <img src={avatarUrl} alt="Avatar Preview" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                                        <img src={getProxyUrl(avatarUrl)} alt="Avatar Preview" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                                     ) : (
                                         user.name.charAt(0)
                                     )}

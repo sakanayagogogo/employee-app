@@ -7,6 +7,7 @@ import PushPermissionBanner from '@/components/push/PushPermissionBanner';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { getProxyUrl } from '@/lib/image';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     const { user, loading, logout, unreadCount, unreadInquiryCount } = useAuth();
@@ -126,7 +127,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                         <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => router.push('/profile')}>
                             <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold shadow-inner overflow-hidden border border-white/30">
                                 {user.avatarUrl ? (
-                                    <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                    <img src={getProxyUrl(user.avatarUrl)} alt="Avatar" className="w-full h-full object-cover" />
                                 ) : (
                                     user.name.charAt(0)
                                 )}
@@ -145,7 +146,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     <div className="flex items-center z-10 cursor-pointer" onClick={() => router.push('/profile')}>
                         <div className="w-8 h-8 rounded-full border border-white/20 bg-gray-200 flex items-center justify-center overflow-hidden">
                             {user.avatarUrl ? (
-                                <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                <img src={getProxyUrl(user.avatarUrl)} alt="Avatar" className="w-full h-full object-cover" />
                             ) : (
                                 <span className="text-gray-500 font-bold text-xs">{user.name.charAt(0)}</span>
                             )}
@@ -172,7 +173,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                             </Link>
                             <div className="h-24 bg-gradient-to-r from-emerald-100 to-emerald-200 relative overflow-hidden">
                                 {user.backgroundUrl ? (
-                                    <img src={user.backgroundUrl} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
+                                    <img src={getProxyUrl(user.backgroundUrl)} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
                                 ) : (
                                     <div className="absolute inset-0 opacity-40 mix-blend-multiply flex items-center justify-center overflow-hidden">
                                         <svg className="w-full h-full text-emerald-500/20 max-w-none" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -185,7 +186,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                             </div>
                             <div className="px-4 pb-4 relative pt-12">
                                 <div className="w-16 h-16 rounded-full border-4 border-white bg-gray-100 flex items-center justify-center shadow-sm absolute -top-8 left-4 text-xl font-bold text-gray-400 z-10 overflow-hidden">
-                                    {user.avatarUrl ? <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" /> : user.name.charAt(0)}
+                                    {user.avatarUrl ? <img src={getProxyUrl(user.avatarUrl)} alt="Avatar" className="w-full h-full object-cover" /> : user.name.charAt(0)}
                                 </div>
                                 <div className="mt-2 text-left">
                                     <h3 className="font-bold text-gray-900 text-lg hover:text-emerald-600 transition-colors w-fit">

@@ -1,12 +1,13 @@
 'use client';
-
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { getProxyUrl } from '@/lib/image';
 
 export const isImage = (url?: string) => {
     if (!url) return false;
-    // More robust regex to handle various URL patterns including fragments and complex query params
-    return /\.(jpg|jpeg|png|gif|webp|heic|svg)(\?|#|$)/i.test(url) || url.startsWith('data:image/');
+    // プロキシURLの場合も考慮（url=... の部分をチェック）
+    const targetUrl = url.includes('url=') ? decodeURIComponent(url.split('url=')[1]) : url;
+    return /\.(jpg|jpeg|png|gif|webp|heic|svg)(\?|#|$)/i.test(targetUrl) || targetUrl.startsWith('data:image/');
 };
 
 interface TimelineGalleryProps {
@@ -58,7 +59,7 @@ export default function TimelineGallery({ images, annId, isModal = false }: Time
         const content = (
             <div className={`${isModal ? 'rounded-2xl' : 'mx-4 rounded-xl'} bg-white/50 overflow-hidden border border-gray-100 mb-4 group relative shadow-sm`}>
                 <img 
-                    src={url} 
+                    src={getProxyUrl(url)} 
                     alt="" 
                     className={`w-full ${isModal ? 'h-auto max-h-[65vh] object-contain' : 'h-56 object-cover'} transition-transform duration-700 group-hover:scale-105`} 
                 />
@@ -68,7 +69,7 @@ export default function TimelineGallery({ images, annId, isModal = false }: Time
             </div>
         );
 
-        if (isModal) return <a href={url} target="_blank" rel="noopener noreferrer" className="cursor-zoom-in block outline-none">{content}</a>;
+        if (isModal) return <a href={getProxyUrl(url)} target="_blank" rel="noopener noreferrer" className="cursor-zoom-in block outline-none">{content}</a>;
         return <Link href={`/announcements/${annId}`} className="block outline-none">{content}</Link>;
     }
 
@@ -88,12 +89,12 @@ export default function TimelineGallery({ images, annId, isModal = false }: Time
                         `}
                     >
                         {isModal ? (
-                            <a href={url} target="_blank" rel="noopener noreferrer" className="block w-full h-full cursor-zoom-in outline-none">
-                                <img src={url} alt="" className="w-full h-full object-contain" />
+                            <a href={getProxyUrl(url)} target="_blank" rel="noopener noreferrer" className="block w-full h-full cursor-zoom-in outline-none">
+                                <img src={getProxyUrl(url)} alt="" className="w-full h-full object-contain" />
                             </a>
                         ) : (
                             <Link href={`/announcements/${annId}`} className="block w-full h-full outline-none">
-                                <img src={url} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                <img src={getProxyUrl(url)} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
                             </Link>
                         )}
