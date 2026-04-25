@@ -59,6 +59,8 @@ export async function GET(request: Request, { params }: Params) {
         return Response.json({ error: '権限がありません' }, { status: 403 });
     }
 
+    const canSeeBirthday = user.role === 'HQ_ADMIN' || parseInt(user.sub) === targetId;
+
     return Response.json({ 
         data: {
             id: row.id,
@@ -72,7 +74,7 @@ export async function GET(request: Request, { params }: Params) {
             unionRoleBranch: row.union_role_branch,
             jobTitle: row.job_title,
             isNonUnion: row.is_non_union,
-            birthday: row.birthday instanceof Date ? (() => { const d = row.birthday; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })() : null,
+            birthday: canSeeBirthday && row.birthday instanceof Date ? (() => { const d = row.birthday; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })() : null,
             isActive: row.is_active,
             mustChangePw: row.must_change_pw,
             lastLoginAt: row.last_login_at,
@@ -130,7 +132,11 @@ export async function PATCH(request: Request, { params }: Params) {
     if (d.unionRole !== undefined) { updates.push(`union_role = $${idx++}`); vals.push(d.unionRole); }
     if (d.unionRoleBranch !== undefined) { updates.push(`union_role_branch = $${idx++}`); vals.push(d.unionRoleBranch); }
     if (d.jobTitle !== undefined) { updates.push(`job_title = $${idx++}`); vals.push(d.jobTitle ?? null); }
-    if (d.birthday !== undefined) { updates.push(`birthday = $${idx++}`); vals.push(d.birthday ?? null); }
+    if (d.birthday !== undefined) { 
+        if (user.role === 'HQ_ADMIN' || parseInt(user.sub) === targetId) {
+            updates.push(`birthday = $${idx++}`); vals.push(d.birthday ?? null); 
+        }
+    }
     if (d.isActive !== undefined) { updates.push(`is_active = $${idx++}`); vals.push(d.isActive); }
     if (d.mustChangePw !== undefined) { updates.push(`must_change_pw = $${idx++}`); vals.push(d.mustChangePw); }
     if (d.password) {

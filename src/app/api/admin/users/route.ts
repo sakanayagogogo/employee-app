@@ -131,7 +131,7 @@ export async function GET(request: Request) {
         isOfficer ? [...vals] : [...vals, limit, offset]
     );
 
-    return Response.json({ data: rows.map(toUser) });
+    return Response.json({ data: rows.map(r => toUser(r, user)) });
 }
 
 export async function POST(request: Request) {
@@ -199,9 +199,10 @@ export async function POST(request: Request) {
     }
 }
 
-function toUser(r: Record<string, unknown>) {
+function toUser(r: Record<string, unknown>, currentUser: import('@/types').JWTPayload) {
     const bd = r.birthday instanceof Date ? r.birthday : (null as Date | null);
-    const birthdayStr = bd ? [
+    const canSeeBirthday = currentUser.role === 'HQ_ADMIN' || parseInt(currentUser.sub) === r.id;
+    const birthdayStr = (canSeeBirthday && bd) ? [
         bd.getFullYear(),
         String(bd.getMonth() + 1).padStart(2, '0'),
         String(bd.getDate()).padStart(2, '0'),

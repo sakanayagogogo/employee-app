@@ -319,9 +319,15 @@ export default function AdminAnnouncementsPage() {
                             </div>
                             {/* Category-specific hint */}
                             {form.category === 'PRESIDENT' && (
-                                <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl text-purple-700 text-sm flex items-center gap-2">
-                                    <span className="text-lg">📚</span>
-                                    <span>機関誌「きずな」として投稿されます。トップに固定表示されます。</span>
+                                <div className="p-4 bg-purple-50 border border-purple-200 rounded-2xl text-purple-700 text-sm flex flex-col gap-2">
+                                    <div className="flex items-center gap-2 font-bold">
+                                        <span className="text-xl">📚</span>
+                                        <span>機関誌「きずな」投稿ガイド</span>
+                                    </div>
+                                    <p className="text-xs leading-relaxed opacity-80">
+                                        機関誌はPDF形式での配信に最適化されています。下の「添付ファイル」セクションからPDFファイルをアップロードしてください。
+                                        公開されると、閲覧画面でそのPDFが直接埋め込まれて表示されます。
+                                    </p>
                                 </div>
                             )}
                             {form.category === 'MUST_READ' && (

@@ -243,6 +243,43 @@ export default function AnnouncementDetailPage({ params }: { params: Promise<{ i
                     {ann.body}
                 </div>
 
+                {/* PDF Viewer for Newsletters/Announcements with PDF */}
+                {(() => {
+                    const pdf = ann.attachments?.find(f => f.url.toLowerCase().endsWith('.pdf'));
+                    if (!pdf) return null;
+                    return (
+                        <div className="mb-10 rounded-3xl overflow-hidden border border-gray-100 shadow-2xl bg-gray-900/5 ring-1 ring-black/5">
+                            <div className="bg-gray-900 p-4 flex items-center justify-between text-white">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center shadow-lg">
+                                        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                    </div>
+                                    <div className="overflow-hidden">
+                                        <span className="text-sm font-black truncate block">{pdf.name}</span>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">PDF Document Viewer</p>
+                                    </div>
+                                </div>
+                                <a 
+                                    href={pdf.url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all text-xs font-black border border-white/10 flex items-center gap-2"
+                                >
+                                    <span>全画面表示</span>
+                                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                </a>
+                            </div>
+                            <div className="relative aspect-[1/1.414] w-full bg-white sm:h-[1000px]">
+                                <iframe 
+                                    src={`${pdf.url}#toolbar=0&navpanes=0`} 
+                                    className="absolute inset-0 w-full h-full border-none"
+                                    title="PDF Viewer"
+                                />
+                            </div>
+                        </div>
+                    );
+                })()}
+
                 {/* Display Menu Tiles */}
                 {widgets.length > 0 && (
                     <div className="mb-8 p-4 bg-gray-50 rounded-2xl border border-gray-100">

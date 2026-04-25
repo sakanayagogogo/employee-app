@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function EditUserPage() {
     const router = useRouter();
     const params = useParams();
     const id = params.id;
+    const { user: currentUser } = useAuth();
 
     const [stores, setStores] = useState<any[]>([]);
     const [masters, setMasters] = useState<any[]>([]);
@@ -65,12 +67,16 @@ export default function EditUserPage() {
         e.preventDefault();
         setError('');
         setSubmitting(true);
-        const payload = { 
+        const payload: any = { 
             ...form, 
             storeId: form.storeId ? parseInt(form.storeId) : null,
             email: form.email.trim() || null
         };
-        if (!payload.password) delete (payload as any).password;
+        if (!payload.password) delete payload.password;
+        
+        // Hide birthday from payload if not authorized
+        const canSeeBirthday = currentUser?.role === 'HQ_ADMIN' || currentUser?.id.toString() === id;
+        if (!canSeeBirthday) delete payload.birthday;
 
         const res = await fetch(`/api/admin/users/${id}`, {
             method: 'PATCH',
@@ -144,16 +150,18 @@ export default function EditUserPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2">生年月日</label>
-                            <input 
-                                type="date" 
-                                required 
-                                value={form.birthday}
-                                onChange={e => setForm({ ...form, birthday: e.target.value })}
-                                className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900" 
-                            />
-                        </div>
+                        {(currentUser?.role === 'HQ_ADMIN' || currentUser?.id.toString() === id) && (
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-2">生年月日</label>
+                                <input 
+                                    type="date" 
+                                    required 
+                                    value={form.birthday}
+                                    onChange={e => setForm({ ...form, birthday: e.target.value })}
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900" 
+                                />
+                            </div>
+                        )}
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-2">パスワード変更</label>
                             <input 

@@ -12,6 +12,7 @@ interface Announcement {
     isRead: boolean;
     authorName: string;
     createdAt: string;
+    attachments?: { name: string; url: string }[];
 }
 
 type CategoryTab = 'ALL' | 'PRESIDENT' | 'MUST_READ' | 'GENERAL';
@@ -58,7 +59,15 @@ function NewsletterContent() {
                         <Link href={`/announcements/${presidentPosts[0].id}`}>
                             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 hover:bg-white/15 transition-all cursor-pointer group shadow-inner">
                                 <div className="flex justify-between items-start gap-4 mb-2">
-                                    <p className="font-bold text-lg leading-snug group-hover:text-purple-100 transition-colors uppercase">{presidentPosts[0].title}</p>
+                                    <div className="flex flex-col gap-1">
+                                        {presidentPosts[0].attachments?.some(f => f.url.toLowerCase().endsWith('.pdf')) && (
+                                            <span className="inline-flex items-center gap-1 text-[10px] font-black text-red-200 uppercase tracking-widest mb-1">
+                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                                PDF VERSION
+                                            </span>
+                                        )}
+                                        <p className="font-bold text-lg leading-snug group-hover:text-purple-100 transition-colors uppercase">{presidentPosts[0].title}</p>
+                                    </div>
                                     {!presidentPosts[0].isRead && (
                                         <span className="shrink-0 bg-white text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-black shadow-sm animate-pulse">NEW</span>
                                     )}
@@ -181,9 +190,17 @@ function NewsCard({ announcement: ann }: { announcement: Announcement }) {
                             <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">NEW</span>
                         )}
                     </div>
-                    <p className={`text-sm ${!ann.isRead ? 'font-bold text-gray-900' : 'font-medium text-gray-700'} line-clamp-2`}>
-                        {ann.title}
-                    </p>
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                        {ann.attachments?.some(f => f.url.toLowerCase().endsWith('.pdf')) && (
+                             <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border border-red-100">
+                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                PDF
+                            </span>
+                        )}
+                        <p className={`text-sm ${!ann.isRead ? 'font-bold text-gray-900' : 'font-medium text-gray-700'} line-clamp-2`}>
+                            {ann.title}
+                        </p>
+                    </div>
                     <div className="flex items-center gap-2 mt-1.5">
                         <p className="text-xs text-gray-400">{ann.authorName}</p>
                         <span className="text-gray-300">·</span>
