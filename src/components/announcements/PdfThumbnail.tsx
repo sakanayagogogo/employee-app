@@ -18,16 +18,18 @@ export default function PdfThumbnail({ url, className = "" }: PdfThumbnailProps)
         const loadPdf = async () => {
             try {
                 // 1. ライブラリを読み込み
-                const pdfjsLib = await import('pdfjs-dist');
+                const pdfjsModule = await import('pdfjs-dist');
+                // ESMとCommonJSの両方に対応
+                const pdfjsLib = (pdfjsModule as any).default || pdfjsModule;
                 
                 // 2. ワーカーの設定（安定したCDNを使用）
-                const PDFJS_VERSION = '4.0.379'; // インストールされたバージョンに合わせるか、汎用的なものを使用
+                const PDFJS_VERSION = '4.0.379';
                 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.mjs`;
 
                 // 3. ドキュメント読み込み
                 const loadingTask = pdfjsLib.getDocument({
                     url: getProxyUrl(url),
-                    cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/cmaps/`, // 日本語フォント対応
+                    cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/cmaps/`,
                     cMapPacked: true,
                 });
                 
@@ -37,7 +39,7 @@ export default function PdfThumbnail({ url, className = "" }: PdfThumbnailProps)
                 const page = await pdf.getPage(1);
                 
                 // 4. レンダリング
-                const viewport = page.getViewport({ scale: 1.2 }); // 少し高画質に
+                const viewport = page.getViewport({ scale: 1.2 });
                 const canvas = canvasRef.current;
                 if (!canvas) return;
 
@@ -47,12 +49,12 @@ export default function PdfThumbnail({ url, className = "" }: PdfThumbnailProps)
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
-                const renderContext = {
+                const renderTask = page.render({
                     canvasContext: context,
                     viewport: viewport
-                };
+                });
                 
-                await page.render(renderContext).promise;
+                await renderTask.promise;
                 
                 if (isMounted) setLoading(false);
             } catch (err) {
