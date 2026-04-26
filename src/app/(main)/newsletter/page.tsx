@@ -44,60 +44,61 @@ function NewsletterContent() {
             </div>
 
             {/* Featured Post (Latest) */}
-            {/* Featured Post (Latest) */}
             {!loading && presidentPosts.length > 0 && (
-                <div className="relative bg-gradient-to-br from-purple-700 via-purple-600 to-indigo-800 rounded-[32px] p-6 sm:p-10 text-white overflow-hidden shadow-2xl shadow-purple-200/50 group">
+                <div className="relative bg-gradient-to-br from-purple-700 via-purple-600 to-indigo-900 rounded-[40px] p-4 sm:p-10 text-white overflow-hidden shadow-2xl shadow-purple-200/50 group">
                     {/* Background Effects */}
-                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9InAiIHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNwKSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==')] opacity-40" />
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9InAiIHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNwKSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==')] opacity-30" />
+                    <div className="absolute -top-24 -right-24 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
                     
-                    <div className="relative z-10 flex flex-col md:flex-row gap-8 lg:gap-12 items-center md:items-stretch">
-                        {/* Hero Preview Image */}
-                        <Link href={`/announcements/${presidentPosts[0].id}`} className="shrink-0 transition-transform duration-500 group-hover:scale-[1.02]">
-                            <div className="w-48 h-64 sm:w-64 sm:h-88 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-5xl border border-white/20 shadow-[0_25px_60px_rgba(0,0,0,0.4)] overflow-hidden relative">
-                                {presidentPosts[0].attachments?.find(f => f.url.toLowerCase().endsWith('.pdf')) ? (
-                                    <PdfThumbnail url={presidentPosts[0].attachments.find(f => f.url.toLowerCase().endsWith('.pdf'))!.url} className="w-full h-full" />
-                                ) : (
-                                    '📚'
-                                )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                    <div className="relative z-10 flex flex-col items-center">
+                        <div className="w-full text-center mb-6">
+                            <p className="text-[10px] font-black text-purple-200 uppercase tracking-[0.3em] mb-1 opacity-70">Latest Issue</p>
+                            <h2 className="text-lg font-black tracking-tight">機関誌「きずな」最新号</h2>
+                        </div>
+
+                        {/* HUGE Preview Image (Taking about 60% of screen width/height) */}
+                        <Link href={`/announcements/${presidentPosts[0].id}`} className="w-full flex justify-center mb-8 px-2">
+                            <div className="relative group/cover transition-transform duration-700 hover:scale-[1.03]">
+                                <div className="w-64 h-92 sm:w-80 sm:h-112 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-6xl border border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.5)] overflow-hidden">
+                                    {presidentPosts[0].attachments?.find(f => f.url.toLowerCase().endsWith('.pdf')) ? (
+                                        <PdfThumbnail url={presidentPosts[0].attachments.find(f => f.url.toLowerCase().endsWith('.pdf'))!.url} className="w-full h-full" />
+                                    ) : (
+                                        '📚'
+                                    )}
+                                </div>
+                                {/* Glossy highlight */}
+                                <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none" />
                             </div>
                         </Link>
 
-                        {/* Content Area */}
-                        <div className="flex-1 flex flex-col justify-between text-center md:text-left py-2">
-                            <div>
-                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/10 mb-6 mx-auto md:mx-0">
-                                    <span className="w-2 h-2 bg-purple-300 rounded-full animate-pulse" />
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-100">Latest Issue</span>
-                                </div>
-                                <h2 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight mb-4 drop-shadow-md">
-                                    {presidentPosts[0].title}
-                                </h2>
-                                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-purple-100/70 text-sm font-medium">
-                                    <div className="flex items-center gap-2">
-                                        <span className="opacity-50 text-xs">執筆：</span>
-                                        <span className="text-white">{presidentPosts[0].authorName}</span>
+                        {/* Text Content Area (Inside the bottom box like the screenshot) */}
+                        <Link href={`/announcements/${presidentPosts[0].id}`} className="w-full max-w-lg">
+                            <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-white/20 hover:bg-white/15 transition-all shadow-inner relative overflow-hidden group/btn">
+                                <div className="flex flex-col items-center text-center relative z-10">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <span className="text-[9px] font-black bg-red-500 text-white px-2.5 py-0.5 rounded-full uppercase tracking-widest shadow-sm">
+                                            PDF VERSION
+                                        </span>
+                                        {!presidentPosts[0].isRead && (
+                                            <span className="text-[9px] font-black bg-white text-purple-700 px-2.5 py-0.5 rounded-full uppercase tracking-widest animate-pulse">NEW</span>
+                                        )}
                                     </div>
-                                    <div className="w-1 h-1 bg-white/20 rounded-full hidden md:block" />
-                                    <div className="flex items-center gap-2">
-                                        <span className="opacity-50 text-xs">発行：</span>
-                                        <span className="text-white">{new Date(presidentPosts[0].createdAt).toLocaleDateString('ja-JP')}</span>
+                                    <h3 className="text-2xl sm:text-3xl font-black mb-3 leading-tight uppercase tracking-tight">
+                                        {presidentPosts[0].title}
+                                    </h3>
+                                    <div className="flex items-center gap-2 text-xs text-purple-100/70 font-medium">
+                                        <span>執筆 : {presidentPosts[0].authorName}</span>
+                                        <span>·</span>
+                                        <span>{new Date(presidentPosts[0].createdAt).toLocaleDateString('ja-JP')}発行</span>
                                     </div>
-                                </div>
-                            </div>
 
-                            <div className="mt-10 md:mt-0 flex flex-col md:flex-row items-center gap-6">
-                                <Link href={`/announcements/${presidentPosts[0].id}`} className="w-full md:w-auto px-10 py-4.5 bg-white text-purple-700 rounded-2xl font-black shadow-xl shadow-black/10 hover:bg-purple-50 transition-all active:scale-95 flex items-center justify-center gap-3 group/btn">
-                                    <span>今すぐ読む</span>
-                                    <svg className="w-5 h-5 transition-transform duration-300 group-hover/btn:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                                </Link>
-                                <div className="flex items-center gap-2 text-purple-200/50">
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Protected Archive</span>
+                                    <div className="mt-6 flex items-center gap-2 text-white font-bold text-sm bg-purple-600/50 px-6 py-3 rounded-2xl border border-white/10 group-hover/btn:bg-purple-600 transition-colors">
+                                        <span>今すぐ読む</span>
+                                        <svg className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     </div>
                 </div>
             )}
