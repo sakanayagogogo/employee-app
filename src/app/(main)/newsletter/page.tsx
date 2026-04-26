@@ -3,6 +3,7 @@ import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { getRelativeTime } from '@/lib/date';
 import { useSearchParams } from 'next/navigation';
+import PdfThumbnail from '@/components/announcements/PdfThumbnail';
 
 interface Announcement {
     id: number;
@@ -47,13 +48,17 @@ function NewsletterContent() {
                 <div className="relative bg-gradient-to-br from-purple-700 via-purple-600 to-indigo-700 rounded-3xl p-6 text-white overflow-hidden shadow-xl shadow-purple-100/50">
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9InAiIHg9IjAiIHk9IjAiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjA1KSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNwKSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==')] opacity-60" />
                     <div className="relative z-10">
-                        <div className="flex items-center gap-4 mb-5">
-                            <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-3xl border border-white/20 shadow-2xl">
-                                📚
+                        <div className="flex items-start gap-6 mb-5">
+                            <div className="w-20 h-28 sm:w-24 sm:h-32 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-3xl border border-white/20 shadow-2xl shrink-0 overflow-hidden">
+                                {presidentPosts[0].attachments?.find(f => f.url.toLowerCase().endsWith('.pdf')) ? (
+                                    <PdfThumbnail url={presidentPosts[0].attachments.find(f => f.url.toLowerCase().endsWith('.pdf'))!.url} className="w-full h-full" />
+                                ) : (
+                                    '📚'
+                                )}
                             </div>
                             <div>
-                                <p className="text-[10px] font-black text-purple-200 uppercase tracking-[0.2em] mb-0.5">LATEST ISSUE</p>
-                                <p className="text-xl font-black tracking-tight">機関誌「きずな」最新号</p>
+                                <p className="text-[10px] font-black text-purple-200 uppercase tracking-[0.2em] mb-1">LATEST ISSUE</p>
+                                <p className="text-xl sm:text-2xl font-black tracking-tight leading-tight">機関誌「きずな」最新号</p>
                             </div>
                         </div>
                         <Link href={`/announcements/${presidentPosts[0].id}`}>
@@ -171,9 +176,13 @@ function NewsCard({ announcement: ann }: { announcement: Announcement }) {
     return (
         <div className={`rounded-2xl p-4 border transition-all hover:shadow-md ${config.bgColor} ${config.borderColor} mb-1`}>
             <div className="flex items-start gap-3">
-                {/* Avatar */}
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${config.avatarBg} ${config.avatarText} font-bold text-sm shadow-sm`}>
-                    {config.avatarIcon || ann.authorName.charAt(0)}
+                {/* Thumbnail / Avatar */}
+                <div className={`w-14 h-20 sm:w-16 sm:h-24 rounded-lg flex items-center justify-center shrink-0 ${config.avatarBg} ${config.avatarText} font-bold text-sm shadow-sm overflow-hidden border border-gray-100`}>
+                    {ann.attachments?.find(f => f.url.toLowerCase().endsWith('.pdf')) ? (
+                        <PdfThumbnail url={ann.attachments.find(f => f.url.toLowerCase().endsWith('.pdf'))!.url} className="w-full h-full" />
+                    ) : (
+                        <span className="text-xl">{config.avatarIcon || ann.authorName.charAt(0)}</span>
+                    )}
                 </div>
                 {/* Content */}
                 <div className="flex-1 min-w-0">
