@@ -17,19 +17,20 @@ export default function PdfThumbnail({ url, className = "" }: PdfThumbnailProps)
         
         const loadPdf = async () => {
             try {
-                // 1. ライブラリを読み込み
+                // 1. ライブラリを動的インポート
                 const pdfjsModule = await import('pdfjs-dist');
-                // ESMとCommonJSの両方に対応
                 const pdfjsLib = (pdfjsModule as any).default || pdfjsModule;
                 
-                // 2. ワーカーの設定（安定したCDNを使用）
-                const PDFJS_VERSION = '4.0.379';
-                pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.mjs`;
+                // 2. ワーカーの設定（バージョン不一致を避けるため、動的に取得）
+                // ※バージョン番号を固定せず、ライブラリ自身のプロパティから取得
+                const version = pdfjsLib.version;
+                pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/pdf.worker.min.mjs`;
 
                 // 3. ドキュメント読み込み
                 const loadingTask = pdfjsLib.getDocument({
                     url: getProxyUrl(url),
-                    cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/cmaps/`,
+                    // 日本語フォントなどのために標準のcMapを使用
+                    cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${version}/cmaps/`,
                     cMapPacked: true,
                 });
                 
@@ -38,8 +39,8 @@ export default function PdfThumbnail({ url, className = "" }: PdfThumbnailProps)
                 if (!isMounted) return;
                 const page = await pdf.getPage(1);
                 
-                // 4. レンダリング
-                const viewport = page.getViewport({ scale: 1.2 });
+                // 4. レンダリング設定（高画質化のために scale を調整）
+                const viewport = page.getViewport({ scale: 1.5 });
                 const canvas = canvasRef.current;
                 if (!canvas) return;
 
@@ -59,6 +60,7 @@ export default function PdfThumbnail({ url, className = "" }: PdfThumbnailProps)
                 if (isMounted) setLoading(false);
             } catch (err) {
                 console.error('PDF Thumbnail error:', err);
+                // エラー内容がコンソールに出るため、開発環境であればそこで詳細がわかります
                 if (isMounted) {
                     setError(true);
                     setLoading(false);
@@ -78,13 +80,20 @@ export default function PdfThumbnail({ url, className = "" }: PdfThumbnailProps)
                     <span className="text-[9px] font-black text-purple-300 uppercase tracking-widest">Generating...</span>
                 </div>
             )}
-            {error ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 text-gray-200 p-2">
-                    <span className="text-xl mb-1">📄</span>
-                    <span className="text-[8px] font-bold uppercase tracking-tight text-center">Preview Error</span>
+            
+            <canvas 
+                ref={canvasRef} 
+                className={`w-full h-full object-contain shadow-sm transition-opacity duration-500 ${loading || error ? 'opacity-0' : 'opacity-100'}`} 
+            />
+
+            {error && !loading && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 text-gray-400 p-2 text-center">
+                    <span className="text-2xl mb-1">📄</span>
+                    <span className="text-[9px] font-bold uppercase tracking-tight leading-tight">
+                        PREVIEW<br/>ERROR
+                    </span>
+                    <p className="text-[7px] mt-1 opacity-50">PDF format or CORS issue</p>
                 </div>
-            ) : (
-                <canvas ref={canvasRef} className={`w-full h-full object-contain shadow-sm transition-opacity duration-500 ${loading ? 'opacity-0' : 'opacity-100'}`} />
             )}
         </div>
     );
