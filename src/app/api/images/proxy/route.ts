@@ -44,14 +44,14 @@ export async function GET(request: NextRequest) {
             return new Response(`Failed to fetch image: ${response.statusText}`, { status: response.status });
         }
 
-        // 5. 画像データをストリームとして返却
-        const contentType = response.headers.get('Content-Type') || 'image/jpeg';
-        const buffer = await response.arrayBuffer();
-
-        return new Response(buffer, {
+        // 5. 画像・PDFデータをストリームとして返却
+        const contentType = response.headers.get('Content-Type') || 'application/octet-stream';
+        
+        // Next.jsのレスポンスとして、元サーバーのBody（ReadableStream）をそのまま渡す
+        return new Response(response.body, {
             headers: {
                 'Content-Type': contentType,
-                'Cache-Control': 'public, max-age=31536000, immutable', // 長期キャッシュ
+                'Cache-Control': 'public, max-age=31536000, immutable',
             },
         });
     } catch (error) {

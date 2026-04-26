@@ -31,6 +31,7 @@ export default function PdfThumbnail({ url, className = "" }: PdfThumbnailProps)
                 // 2. ドキュメント読み込み
                 const loadingTask = pdfjsLib.getDocument({
                     url: getProxyUrl(url),
+                    withCredentials: true, // 認証クッキーを送信する
                     cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
                     cMapPacked: true,
                 });
