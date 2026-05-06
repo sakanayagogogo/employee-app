@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getRelativeTime } from '@/lib/date';
 import { useSearchParams } from 'next/navigation';
 import PdfThumbnail from '@/components/announcements/PdfThumbnail';
+import { getProxyUrl } from '@/lib/image';
 
 interface Announcement {
     id: number;
@@ -57,7 +58,7 @@ function NewsletterContent() {
                         </div>
 
                         {/* HUGE Preview Image (Taking about 60% of screen width/height) */}
-                        <Link href={`/announcements/${presidentPosts[0].id}`} className="w-full flex justify-center mb-8 px-2">
+                        <SmartLink ann={presidentPosts[0]} className="w-full flex justify-center mb-8 px-2">
                             <div className="relative group/cover transition-transform duration-700 hover:scale-[1.03]">
                                 <div className="w-64 h-92 sm:w-80 sm:h-112 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-6xl border border-white/20 shadow-[0_30px_70px_rgba(0,0,0,0.5)] overflow-hidden">
                                     {presidentPosts[0].attachments?.find(f => f.url.toLowerCase().endsWith('.pdf')) ? (
@@ -69,10 +70,10 @@ function NewsletterContent() {
                                 {/* Glossy highlight */}
                                 <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none" />
                             </div>
-                        </Link>
+                        </SmartLink>
 
                         {/* Text Content Area (Inside the bottom box like the screenshot) */}
-                        <Link href={`/announcements/${presidentPosts[0].id}`} className="w-full max-w-lg">
+                        <SmartLink ann={presidentPosts[0]} className="w-full max-w-lg">
                             <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-white/20 hover:bg-white/15 transition-all shadow-inner relative overflow-hidden group/btn">
                                 <div className="flex flex-col items-center text-center relative z-10">
                                     <div className="flex items-center gap-2 mb-3">
@@ -98,7 +99,7 @@ function NewsletterContent() {
                                     </div>
                                 </div>
                             </div>
-                        </Link>
+                        </SmartLink>
                     </div>
                 </div>
             )}
@@ -137,9 +138,9 @@ function NewsletterContent() {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {presidentPosts.slice(1).map((ann) => (
-                        <Link key={ann.id} href={`/announcements/${ann.id}`}>
+                        <SmartLink key={ann.id} ann={ann}>
                             <NewsCard announcement={ann} />
-                        </Link>
+                        </SmartLink>
                     ))}
                 </div>
             )}
@@ -237,5 +238,21 @@ function NewsCard({ announcement: ann }: { announcement: Announcement }) {
                 </svg>
             </div>
         </div>
+    );
+}
+
+function SmartLink({ ann, className, children }: { ann: Announcement, className?: string, children: React.ReactNode }) {
+    const pdf = ann.attachments?.find(f => f.url.toLowerCase().endsWith('.pdf'));
+    if (pdf) {
+        return (
+            <a href={getProxyUrl(pdf.url)} target="_blank" rel="noopener noreferrer" className={className}>
+                {children}
+            </a>
+        );
+    }
+    return (
+        <Link href={`/announcements/${ann.id}`} className={className}>
+            {children}
+        </Link>
     );
 }
