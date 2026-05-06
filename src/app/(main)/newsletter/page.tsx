@@ -245,9 +245,9 @@ function SmartLink({ ann, className, children }: { ann: Announcement, className?
     const pdf = ann.attachments?.find(f => f.url.toLowerCase().endsWith('.pdf'));
     if (pdf) {
         return (
-            <a href={getProxyUrl(pdf.url)} target="_blank" rel="noopener noreferrer" className={className}>
+            <Link href={`/newsletter/preview/${ann.id}`} className={className}>
                 {children}
-            </a>
+            </Link>
         );
     }
     return (
