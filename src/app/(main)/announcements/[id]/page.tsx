@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getRelativeTime } from '@/lib/date';
 import TimelineGallery, { isImage } from '@/components/TimelineGallery';
 import { getProxyUrl } from '@/lib/image';
+import PdfViewer from '@/components/announcements/PdfViewer';
 
 interface Announcement {
     id: number;
@@ -270,12 +271,8 @@ export default function AnnouncementDetailPage({ params }: { params: Promise<{ i
                                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                                 </a>
                             </div>
-                            <div className="relative aspect-[1/1.414] w-full bg-white sm:h-[1000px]">
-                                <iframe 
-                                    src={`${getProxyUrl(pdf.url)}#toolbar=0&navpanes=0`} 
-                                    className="absolute inset-0 w-full h-full border-none"
-                                    title="PDF Viewer"
-                                />
+                            <div className="relative w-full bg-zinc-900 px-2 sm:px-6">
+                                <PdfViewer url={pdf.url} />
                             </div>
                         </div>
                     );

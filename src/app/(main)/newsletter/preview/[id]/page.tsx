@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { getProxyUrl } from '@/lib/image';
+import PdfViewer from '@/components/announcements/PdfViewer';
 
 interface Announcement {
     id: number;
@@ -78,12 +78,8 @@ export default function NewsletterPdfPreview({ params }: { params: Promise<{ id:
             </div>
 
             {/* PDF Viewer */}
-            <div className="flex-1 w-full relative bg-zinc-900 safe-pb">
-                <iframe 
-                    src={`${getProxyUrl(pdf.url)}#toolbar=0&navpanes=0`} 
-                    className="absolute inset-0 w-full h-full border-none"
-                    title="PDF Viewer"
-                />
+            <div className="flex-1 w-full relative bg-zinc-900 safe-pb overflow-y-auto hide-scrollbar px-2 sm:px-6">
+                <PdfViewer url={pdf.url} />
             </div>
         </div>
     );
