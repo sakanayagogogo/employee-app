@@ -601,9 +601,6 @@ export default function HomePage() {
                                     {/* Header */}
                                     <div className="p-4 flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl shrink-0">
-                                                📚
-                                            </div>
                                             <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold overflow-hidden">
                                                 {ann.authorAvatarUrl ? <img src={ann.authorAvatarUrl} alt="Avatar" className="w-full h-full object-cover" /> : ann.authorName.charAt(0)}
                                             </div>
