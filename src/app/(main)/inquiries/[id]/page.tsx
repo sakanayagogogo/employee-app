@@ -124,19 +124,19 @@ export default function InquiryDetailPage({ params }: { params: Promise<{ id: st
                             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${statusColors[inquiry.status]}`}>
                                 {statusLabels[inquiry.status]}
                             </span>
-                            {isAdmin && !isClosed && (
+                            {isAdmin && (
                                 <button
                                     onClick={async () => {
                                         await fetch(`/api/inquiries/${id}/status`, {
                                             method: 'PATCH',
                                             headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({ status: 'CLOSED' }),
+                                            body: JSON.stringify({ status: isClosed ? 'IN_PROGRESS' : 'CLOSED' }),
                                         });
                                         await load();
                                     }}
-                                    className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                                    className={`text-xs transition-colors ${isClosed ? 'text-gray-400 hover:text-yellow-600' : 'text-gray-400 hover:text-red-500'}`}
                                 >
-                                    クローズ
+                                    {isClosed ? '対応中に戻す' : 'クローズ'}
                                 </button>
                             )}
                             {(isAdmin || inquiry.authorId === user?.id) && (
