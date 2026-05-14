@@ -54,6 +54,11 @@ export async function GET(_req: Request, { params }: Params) {
         [inquiryId]
     );
 
+    const reads = await query<Record<string, unknown>>(
+        `SELECT user_id, last_read_at FROM inquiry_reads WHERE inquiry_id = $1`,
+        [inquiryId]
+    );
+
     return Response.json({
         data: {
             id: inquiry.id, title: inquiry.title, destination: inquiry.destination,
@@ -65,6 +70,7 @@ export async function GET(_req: Request, { params }: Params) {
             recipientId: inquiry.recipient_id, recipientName: inquiry.recipient_name,
             recipientEmployeeNumber: inquiry.recipient_employee_number,
             createdAt: inquiry.created_at, updatedAt: inquiry.updated_at,
+            reads: reads.map(r => ({ userId: r.user_id, lastReadAt: r.last_read_at })),
             messages: messages.map((m) => ({
                 id: m.id, inquiryId: m.inquiry_id, authorId: m.author_id,
                 authorName: m.author_name, authorRole: m.author_role,

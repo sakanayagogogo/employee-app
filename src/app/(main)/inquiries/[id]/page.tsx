@@ -14,6 +14,11 @@ interface Message {
     createdAt: string;
 }
 
+interface InquiryRead {
+    userId: number;
+    lastReadAt: string;
+}
+
 interface InquiryDetail {
     id: number;
     title: string;
@@ -28,7 +33,17 @@ interface InquiryDetail {
     recipientId: number | null;
     recipientName: string | null;
     recipientEmployeeNumber: string | null;
+    reads?: InquiryRead[];
     messages: Message[];
+}
+
+function formatMessageTime(dateStr: string) {
+    const d = new Date(dateStr);
+    const today = new Date();
+    const isToday = d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    const timeStr = d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    if (isToday) return timeStr;
+    return `${d.getMonth() + 1}/${d.getDate()} ${timeStr}`;
 }
 
 const statusColors: Record<string, string> = {
@@ -165,6 +180,8 @@ export default function InquiryDetailPage({ params }: { params: Promise<{ id: st
                 {inquiry.messages.map((msg) => {
                     const isMe = msg.authorId === user?.id;
                     const isAdminMsg = msg.authorRole === 'STORE_ADMIN' || msg.authorRole === 'HQ_ADMIN';
+                    const msgTime = new Date(msg.createdAt).getTime();
+                    const isReadByOther = inquiry.reads?.some(r => r.userId !== user?.id && new Date(r.lastReadAt).getTime() >= msgTime);
                     return (
                         <div key={msg.id} className={`flex gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'} items-end`}>
                             {/* Avatar (only for others) */}
@@ -178,19 +195,24 @@ export default function InquiryDetailPage({ params }: { params: Promise<{ id: st
                                 {!isMe && <p className="text-[10px] font-bold text-white/80 px-1 mb-0.5 drop-shadow-sm">{msg.authorName}</p>}
                                 <div className="flex items-end gap-1.5 shrink-0">
                                     {isMe && (
-                                        <span className="text-[9px] text-white/70 font-bold mb-1 order-1">
-                                            {new Date(msg.createdAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
-                                        </span>
+                                        <div className="flex flex-col items-end gap-0.5 mb-1 order-1">
+                                            {isReadByOther && (
+                                                <span className="text-[9px] text-white/80 font-bold leading-none drop-shadow-sm">既読</span>
+                                            )}
+                                            <span className="text-[9px] text-white/80 font-bold leading-none drop-shadow-sm">
+                                                {formatMessageTime(msg.createdAt)}
+                                            </span>
+                                        </div>
                                     )}
-                                    <div className={`px-3 py-2 rounded-2xl text-sm leading-relaxed shadow-sm relative ${isMe
+                                    <div className={`px-3 py-2 rounded-2xl text-sm leading-relaxed shadow-sm relative whitespace-pre-wrap break-words ${isMe
                                             ? 'bg-[#85E249] text-gray-900 rounded-tr-none'
                                             : 'bg-white text-gray-900 rounded-tl-none'
                                         } order-2`}>
                                         {msg.body}
                                     </div>
                                     {!isMe && (
-                                        <span className="text-[9px] text-white/70 font-bold mb-1 order-3">
-                                            {new Date(msg.createdAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
+                                        <span className="text-[9px] text-white/80 font-bold mb-1 order-3 leading-none drop-shadow-sm">
+                                            {formatMessageTime(msg.createdAt)}
                                         </span>
                                     )}
                                 </div>
