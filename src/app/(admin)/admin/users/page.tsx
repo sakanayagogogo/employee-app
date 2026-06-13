@@ -283,7 +283,7 @@ export default function AdminUsersPage() {
                 </div>
             </div>
 
-            <div className="flex-1 space-y-6">
+            <div className="flex-1 min-w-0 w-full space-y-6">
                 {csvImporting && (
                     <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[100] flex items-center justify-center">
                         <div className="bg-white px-10 py-10 rounded-[40px] shadow-2xl border border-gray-100 flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-300 max-w-sm w-full mx-4">

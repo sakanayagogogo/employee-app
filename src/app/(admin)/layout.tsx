@@ -287,7 +287,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             )}
 
             {/* Main Content */}
-            <main className={`flex-1 transition-all duration-300 p-4 sm:p-8 pt-20 lg:pt-8 w-full animate-fade-in ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
+            <main className={`flex-1 min-w-0 transition-all duration-300 p-4 sm:p-8 pt-20 lg:pt-8 w-full animate-fade-in ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'}`}>
                 <div className="max-w-6xl mx-auto">
                     {children}
                 </div>
