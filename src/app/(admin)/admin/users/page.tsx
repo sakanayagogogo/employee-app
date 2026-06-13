@@ -228,9 +228,9 @@ export default function AdminUsersPage() {
     }, [] as { id: number; name: string; stores: Store[] }[]);
 
     return (
-        <div className="flex gap-6 items-start min-h-[600px]">
+        <div className="flex flex-col md:flex-row gap-6 items-start min-h-[600px]">
             {/* Tree Sidebar */}
-            <div className="w-48 flex-shrink-0 bg-white rounded-3xl border border-gray-100 p-4 sticky top-6 max-h-[calc(100vh-120px)] overflow-y-auto shadow-sm">
+            <div className="w-full md:w-48 flex-shrink-0 bg-white rounded-3xl border border-gray-100 p-4 md:sticky md:top-6 max-h-[calc(100vh-120px)] overflow-y-auto shadow-sm">
                 <div className="space-y-1">
                     <button 
                         onClick={() => setFilter({ type: 'all' })}
@@ -315,7 +315,7 @@ export default function AdminUsersPage() {
                         </div>
                     </div>
                 )}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">
                             {filter.type === 'all' ? 'ユーザー管理' : 
@@ -328,7 +328,7 @@ export default function AdminUsersPage() {
                              (filter.type === 'group' || filter.type === 'store') ? `${filter.name}のスタッフを表示中` : ''}
                         </p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                         <button onClick={downloadTemplate} className="flex items-center gap-2 border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
                             📄 テンプレート
                         </button>
@@ -434,7 +434,8 @@ export default function AdminUsersPage() {
                             </button>
                         </div>
                     ) : (
-                        <table className="w-full text-sm">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm min-w-[800px]">
                             <thead>
                                 <tr className="bg-gray-50/50 border-b border-gray-100">
                                     <th className="text-left px-6 py-4 font-bold text-gray-400 text-[10px] uppercase tracking-wider">社員番号</th>
@@ -513,6 +514,7 @@ export default function AdminUsersPage() {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
                     )}
                     {!loading && users.length === 0 && (
                         <div className="text-center py-20 text-gray-300">
