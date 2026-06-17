@@ -1,6 +1,12 @@
 const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
+const dns = require('node:dns');
+
+// Fix for DNS resolution flakiness on some networks (especially EAI_AGAIN/IPv6 issues)
+if (typeof dns.setDefaultResultOrder === 'function') {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 // Load .env.local if it exists (local dev), otherwise default .env
 const envLocalPath = path.join(__dirname, '../.env.local');
