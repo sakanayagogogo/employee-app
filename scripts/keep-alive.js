@@ -33,9 +33,9 @@ async function run() {
     await client.connect();
     console.log("Connected. Executing keep-alive query...");
     const start = Date.now();
-    const res = await client.query('SELECT NOW() as current_time');
+    const res = await client.query('SELECT NOW() as current_time, (SELECT id FROM users LIMIT 1) as user_id');
     const duration = Date.now() - start;
-    console.log(`Success! Server time: ${res.rows[0].current_time} (took ${duration}ms)`);
+    console.log(`Success! Server time: ${res.rows[0].current_time}, User ID: ${res.rows[0].user_id} (took ${duration}ms)`);
   } catch (error) {
     console.error("Keep-alive query failed:", error);
     process.exit(1);
