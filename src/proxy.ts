@@ -6,6 +6,8 @@ import { AUTH_COOKIE } from './lib/auth';
 const PUBLIC_PATHS = [
     '/login',
     '/api/auth/login',
+    // Vercel Cron authenticates this endpoint with CRON_SECRET in the route.
+    '/api/cron/keep-alive',
     '/api/test-db',
     '/_next',
     '/favicon.ico',
