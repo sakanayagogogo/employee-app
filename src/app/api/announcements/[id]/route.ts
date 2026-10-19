@@ -3,23 +3,26 @@ import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 import { isAdmin } from '@/lib/rbac';
 import { logAudit } from '@/lib/audit';
+import { canManageAnnouncement, canViewAnnouncement, storeAdminTargetsAreValid } from '@/lib/content-access';
 
 type Params = { params: Promise<{ id: string }> };
 
+const httpsUrl = z.string().url().refine((value) => new URL(value).protocol === 'https:', 'HTTPS URL only');
+
 const patchSchema = z.object({
     title: z.string().min(1).max(200).optional(),
-    body: z.string().min(1).optional(),
+    body: z.string().min(1).max(50_000).optional(),
     importance: z.enum(['NORMAL', 'IMPORTANT']).optional(),
     category: z.enum(['GENERAL', 'PRESIDENT', 'MUST_READ']).optional(),
-    coverImageUrl: z.string().url().or(z.literal('')).nullish(),
+    coverImageUrl: httpsUrl.or(z.literal('')).nullish(),
     startAt: z.string().datetime().nullish(),
     endAt: z.string().datetime().nullish(),
     isPublished: z.boolean().optional(),
     attachments: z.array(z.object({
-        name: z.string(),
-        url: z.string().url(),
-    })).optional(),
-    widgetIds: z.array(z.number()).optional(),
+        name: z.string().min(1).max(255),
+        url: httpsUrl,
+    })).max(20).optional(),
+    widgetIds: z.array(z.number().int().positive()).max(50).optional(),
     targets: z.array(
         z.object({
             targetType: z.enum(['ALL', 'STORE', 'STORE_GROUP', 'EMPLOYMENT_TYPE', 'UNION_ROLE', 'USER']),
@@ -33,6 +36,10 @@ export async function GET(_req: Request, { params }: Params) {
     if (!user) return Response.json({ error: '認証が必要です' }, { status: 401 });
 
     const { id } = await params;
+    const announcementId = parseInt(id);
+    if (!Number.isSafeInteger(announcementId) || !(await canViewAnnouncement(user, announcementId))) {
+        return Response.json({ error: 'Announcement not found' }, { status: 404 });
+    }
     const now = new Date().toISOString();
 
     const ann = await queryOne<Record<string, unknown>>(
@@ -56,7 +63,7 @@ export async function GET(_req: Request, { params }: Params) {
      FROM announcements a
      JOIN users u ON u.id = a.author_id
      WHERE a.id = $1`,
-        [parseInt(id), parseInt(user.sub)]
+        [announcementId, parseInt(user.sub)]
     );
 
     if (!ann) return Response.json({ error: 'お知らせが見つかりません' }, { status: 404 });
@@ -67,7 +74,7 @@ export async function GET(_req: Request, { params }: Params) {
             `INSERT INTO announcement_reads (announcement_id, user_id, read_at)
              VALUES ($1, $2, NOW())
              ON CONFLICT (announcement_id, user_id) DO NOTHING`,
-            [parseInt(id), parseInt(user.sub)]
+            [announcementId, parseInt(user.sub)]
         );
         // Ensure the response reflects the read status
         ann.is_read = true;
@@ -84,7 +91,7 @@ export async function GET(_req: Request, { params }: Params) {
 
     const targets = await query(
         `SELECT id, target_type, target_value FROM announcement_targets WHERE announcement_id = $1`,
-        [parseInt(id)]
+        [announcementId]
     );
 
     return Response.json({
@@ -113,14 +120,24 @@ export async function PATCH(request: Request, { params }: Params) {
     if (!user || !isAdmin(user.role)) return Response.json({ error: '権限がありません' }, { status: 403 });
 
     const { id } = await params;
+    const announcementId = parseInt(id);
     try {
         const body = await request.json();
         const parsed = patchSchema.safeParse(body);
         if (!parsed.success) return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
+        if (!Number.isSafeInteger(announcementId) || !(await canManageAnnouncement(user, announcementId))) {
+            return Response.json({ error: 'Forbidden' }, { status: 403 });
+        }
+        if (parsed.data.targets && !storeAdminTargetsAreValid(user, parsed.data.targets)) {
+            return Response.json({ error: 'Forbidden' }, { status: 403 });
+        }
+        if (user.role === 'STORE_ADMIN' && parsed.data.category !== undefined && parsed.data.category !== 'GENERAL') {
+            return Response.json({ error: 'Forbidden' }, { status: 403 });
+        }
 
         const ann = await queryOne<{ id: number; author_id: number; store_id?: number }>(
             `SELECT id, author_id FROM announcements WHERE id = $1`,
-            [parseInt(id)]
+            [announcementId]
         );
         if (!ann) return Response.json({ error: 'お知らせが見つかりません' }, { status: 404 });
 
@@ -142,21 +159,21 @@ export async function PATCH(request: Request, { params }: Params) {
 
         if (updates.length > 0) {
             updates.push(`updated_at = NOW()`);
-            vals.push(parseInt(id));
+            vals.push(announcementId);
             await query(`UPDATE announcements SET ${updates.join(', ')} WHERE id = $${idx}`, vals);
         }
 
         if (d.targets) {
-            await query(`DELETE FROM announcement_targets WHERE announcement_id = $1`, [parseInt(id)]);
+            await query(`DELETE FROM announcement_targets WHERE announcement_id = $1`, [announcementId]);
             for (const t of d.targets) {
                 await query(
                     `INSERT INTO announcement_targets (announcement_id, target_type, target_value) VALUES ($1, $2, $3)`,
-                    [parseInt(id), t.targetType, t.targetValue ?? null]
+                    [announcementId, t.targetType, t.targetValue ?? null]
                 );
             }
         }
 
-        await logAudit(user, 'ANNOUNCEMENT_UPDATE', 'announcements', parseInt(id), d as Record<string, unknown>);
+        await logAudit(user, 'ANNOUNCEMENT_UPDATE', 'announcements', announcementId, d as Record<string, unknown>);
 
         return Response.json({ message: '更新しました' });
     } catch (err) {
@@ -169,10 +186,14 @@ export async function DELETE(_req: Request, { params }: Params) {
     if (!user || !isAdmin(user.role)) return Response.json({ error: '権限がありません' }, { status: 403 });
 
     const { id } = await params;
+    const announcementId = parseInt(id);
     try {
+        if (!Number.isSafeInteger(announcementId) || !(await canManageAnnouncement(user, announcementId))) {
+            return Response.json({ error: 'Forbidden' }, { status: 403 });
+        }
         const ann = await queryOne<{ id: number }>(
             `SELECT id FROM announcements WHERE id = $1`,
-            [parseInt(id)]
+            [announcementId]
         );
         if (!ann) return Response.json({ error: 'お知らせが見つかりません' }, { status: 404 });
 

@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
-import { isAdmin, canAccessStore } from '@/lib/rbac';
 import { logAudit } from '@/lib/audit';
+import { getAccessibleWidget } from '@/lib/content-access';
 
 type Params = { params: Promise<{ widgetId: string }> };
 
@@ -15,17 +15,13 @@ export async function GET(request: Request, { params }: Params) {
     const { widgetId } = await params;
     const widgetIdInt = parseInt(widgetId);
 
-    // Fetch the widget
-    const widget = await queryOne<{ id: number; type: string; title: string; category_name: string | null; config_json: Record<string, unknown>; expires_at: string | null; is_published: boolean; show_in_header: boolean }>(
-        `SELECT id, type, title, category_name, config_json, expires_at, is_published, show_in_header FROM portal_widgets WHERE id = $1`,
-        [widgetIdInt]
-    );
+    const widget = await getAccessibleWidget(user, widgetIdInt);
 
     if (!widget) {
         return Response.json({ error: 'ウィジェットが見つかりません' }, { status: 404 });
     }
 
-    if (!widget.is_published && user.role === 'GENERAL') {
+    if (!widget.is_published && user.role !== 'HQ_ADMIN' && user.role !== 'STORE_ADMIN') {
         return Response.json({ error: 'このウィジェットは現在非公開です' }, { status: 403 });
     }
 

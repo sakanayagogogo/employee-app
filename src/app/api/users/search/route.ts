@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { query } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
-import { isAdmin } from '@/lib/rbac';
+import { getAreaGroupId, isAdmin } from '@/lib/rbac';
 
 /**
  * GET /api/users/search?q=<employee_number or name>
@@ -17,6 +17,19 @@ export async function GET(request: NextRequest) {
         return Response.json({ data: [] });
     }
 
+    const values: unknown[] = [`%${q}%`, `%${q}%`];
+    let scopeClause = '';
+    if (user.role === 'STORE_ADMIN') {
+        const areaGroupId = getAreaGroupId(user.unionRole);
+        if (areaGroupId) {
+            values.push(user.storeId ?? -1, areaGroupId);
+            scopeClause = `AND (u.store_id = $3 OR s.group_id = $4)`;
+        } else {
+            values.push(user.storeId ?? -1);
+            scopeClause = `AND u.store_id = $3`;
+        }
+    }
+
     const rows = await query<{
         id: number;
         employee_number: string;
@@ -29,9 +42,10 @@ export async function GET(request: NextRequest) {
          LEFT JOIN stores s ON s.id = u.store_id
          WHERE u.is_active = TRUE
            AND (u.employee_number ILIKE $1 OR u.name ILIKE $2)
+           ${scopeClause}
          ORDER BY u.employee_number ASC
          LIMIT 20`,
-        [`%${q}%`, `%${q}%`]
+        values
     );
 
     return Response.json({

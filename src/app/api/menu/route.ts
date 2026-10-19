@@ -1,4 +1,4 @@
-import { query, queryOne } from '@/lib/db';
+import { query } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
@@ -12,7 +12,9 @@ export async function GET(_req: Request) {
 
     const condition = fetchAll
         ? ``
-        : `WHERE w.is_published = TRUE AND (w.expires_at IS NULL OR w.expires_at > NOW())`;
+        : `WHERE w.is_published = TRUE
+             AND (w.expires_at IS NULL OR w.expires_at > NOW())
+             AND (w.store_id IS NULL OR w.store_id = $2)`;
 
     const widgets = await query<Record<string, unknown>>(
         `SELECT w.id, w.type, w.title, w.config_json, w.size, w.category_name,
@@ -25,7 +27,7 @@ export async function GET(_req: Request) {
      LEFT JOIN widget_responses wr ON wr.widget_id = w.id AND wr.user_id = $1
      ${condition}
      ORDER BY w.sort_order ASC`,
-        [parseInt(user.sub)]
+        fetchAll ? [parseInt(user.sub)] : [parseInt(user.sub), user.storeId]
     );
 
     return Response.json({

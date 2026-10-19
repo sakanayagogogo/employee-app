@@ -1,6 +1,7 @@
 import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 import { isAdmin } from '@/lib/rbac';
+import { canManageAnnouncement } from '@/lib/content-access';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -9,14 +10,18 @@ export async function GET(_req: Request, { params }: Params) {
     if (!user || !isAdmin(user.role)) return Response.json({ error: '権限がありません' }, { status: 403 });
 
     const { id } = await params;
+    const announcementId = parseInt(id);
+    if (!Number.isSafeInteger(announcementId) || !(await canManageAnnouncement(user, announcementId))) {
+        return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const ann = await queryOne<{ id: number; title: string }>(
         `SELECT id, title FROM announcements WHERE id = $1`,
-        [parseInt(id)]
+        [announcementId]
     );
     if (!ann) return Response.json({ error: 'お知らせが見つかりません' }, { status: 404 });
 
-    const paramsList: any[] = [parseInt(id)];
+    const paramsList: unknown[] = [announcementId];
     let storeFilter = '';
     if (user.role === 'STORE_ADMIN') {
         const { getAreaGroupId } = await import('@/lib/rbac');

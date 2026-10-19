@@ -1,5 +1,6 @@
 import { query } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { canViewAnnouncement } from '@/lib/content-access';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -8,6 +9,10 @@ export async function GET(_req: Request, { params }: Params) {
     if (!user) return Response.json({ error: '認証が必要です' }, { status: 401 });
 
     const { id } = await params;
+    const announcementId = parseInt(id);
+    if (!Number.isSafeInteger(announcementId) || !(await canViewAnnouncement(user, announcementId))) {
+        return Response.json({ error: 'Announcement not found' }, { status: 404 });
+    }
 
     try {
         const reads = await query(
@@ -16,7 +21,7 @@ export async function GET(_req: Request, { params }: Params) {
              JOIN users u ON u.id = ar.user_id
              WHERE ar.announcement_id = $1
              ORDER BY ar.read_at DESC`,
-            [parseInt(id)]
+            [announcementId]
         );
 
         return Response.json({ data: reads });

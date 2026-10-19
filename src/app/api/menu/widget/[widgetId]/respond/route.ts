@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { getAccessibleWidget } from '@/lib/content-access';
 
 type Params = { params: Promise<{ widgetId: string }> };
 
@@ -15,10 +16,7 @@ export async function POST(request: Request, { params }: Params) {
     const { widgetId } = await params;
     const widgetIdInt = parseInt(widgetId);
 
-    const widget = await queryOne<{ id: number; type: string; expires_at: string | null }>(
-        `SELECT id, type, expires_at FROM portal_widgets WHERE id = $1 AND is_published = TRUE`,
-        [widgetIdInt]
-    );
+    const widget = await getAccessibleWidget(user, widgetIdInt, { publishedOnly: true });
     if (!widget) return Response.json({ error: 'ウィジェットが見つかりません' }, { status: 404 });
 
     if (widget.expires_at && new Date(widget.expires_at) < new Date()) {
@@ -28,6 +26,9 @@ export async function POST(request: Request, { params }: Params) {
     const body = await request.json();
     const parsed = respondSchema.safeParse(body);
     if (!parsed.success) return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    if (JSON.stringify(parsed.data.responseJson).length > 1_000_000) {
+        return Response.json({ error: 'Response is too large' }, { status: 413 });
+    }
 
     if (widget.type === 'BOARD' || widget.type === 'FORM') {
         // BOARD and FORM allow multiple entries

@@ -1,5 +1,6 @@
 import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { canViewAnnouncement } from '@/lib/content-access';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -8,10 +9,14 @@ export async function POST(_req: Request, { params }: Params) {
     if (!user) return Response.json({ error: '認証が必要です' }, { status: 401 });
 
     const { id } = await params;
+    const announcementId = parseInt(id);
+    if (!Number.isSafeInteger(announcementId) || !(await canViewAnnouncement(user, announcementId))) {
+        return Response.json({ error: 'Announcement not found' }, { status: 404 });
+    }
 
     const ann = await queryOne<{ id: number }>(
         `SELECT id FROM announcements WHERE id = $1 AND is_published = TRUE`,
-        [parseInt(id)]
+        [announcementId]
     );
     if (!ann) return Response.json({ error: 'お知らせが見つかりません' }, { status: 404 });
 
@@ -20,7 +25,7 @@ export async function POST(_req: Request, { params }: Params) {
         `INSERT INTO announcement_reads (announcement_id, user_id, read_at)
      VALUES ($1, $2, NOW())
      ON CONFLICT (announcement_id, user_id) DO NOTHING`,
-        [parseInt(id), parseInt(user.sub)]
+        [announcementId, parseInt(user.sub)]
     );
 
     return Response.json({ message: '既読にしました' });

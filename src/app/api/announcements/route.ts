@@ -5,25 +5,28 @@ import { getCurrentUser } from '@/lib/auth';
 import { isAdmin } from '@/lib/rbac';
 import { logAudit } from '@/lib/audit';
 import { sendAnnouncementPush } from '@/lib/push';
+import { storeAdminTargetsAreValid } from '@/lib/content-access';
+
+const httpsUrl = z.string().url().refine((value) => new URL(value).protocol === 'https:', 'HTTPS URL only');
 
 const createSchema = z.object({
     title: z.string().min(1).max(200),
-    body: z.string().min(1),
+    body: z.string().min(1).max(50_000),
     importance: z.enum(['NORMAL', 'IMPORTANT']).default('NORMAL'),
     category: z.enum(['GENERAL', 'PRESIDENT', 'MUST_READ']).default('GENERAL'),
-    coverImageUrl: z.string().url().or(z.literal('')).nullish(),
+    coverImageUrl: httpsUrl.or(z.literal('')).nullish(),
     isPublished: z.boolean().default(false),
     startAt: z.string().datetime().nullish(),
     endAt: z.string().datetime().nullish(),
     attachments: z.array(z.object({
-        name: z.string(),
-        url: z.string().url(),
-    })).optional().default([]),
+        name: z.string().min(1).max(255),
+        url: httpsUrl,
+    })).max(20).optional().default([]),
     targets: z.array(z.object({
         targetType: z.enum(['ALL', 'STORE', 'STORE_GROUP', 'EMPLOYMENT_TYPE', 'UNION_ROLE', 'USER']),
         targetValue: z.string().nullish(),
     })).min(1),
-    widgetIds: z.array(z.number()).optional().default([]),
+    widgetIds: z.array(z.number().int().positive()).max(50).optional().default([]),
     sendPush: z.boolean().optional().default(true),
 });
 
@@ -32,8 +35,8 @@ export async function GET(request: NextRequest) {
     if (!user) return Response.json({ error: '認証が必要です' }, { status: 401 });
 
     const sp = request.nextUrl.searchParams;
-    const limit = parseInt(sp.get('limit') ?? '50');
-    const offset = parseInt(sp.get('offset') ?? '0');
+    const limit = Math.min(Math.max(parseInt(sp.get('limit') ?? '50') || 50, 1), 100);
+    const offset = Math.max(parseInt(sp.get('offset') ?? '0') || 0, 0);
     const categoryFilter = sp.get('category');
 
     let targetClause = '';
@@ -55,8 +58,7 @@ export async function GET(request: NextRequest) {
         
         targetClause = `
         AND (
-            a.category = 'PRESIDENT'
-            OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'ALL')
+            EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'ALL')
             OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'USER' AND target_value = $2::text)
             OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'STORE' AND target_value = $3::text)
             OR EXISTS (SELECT 1 FROM announcement_targets WHERE announcement_id = a.id AND target_type = 'STORE_GROUP' AND target_value = $4::text)
@@ -144,7 +146,7 @@ export async function POST(request: Request) {
     const { title, body: bodyText, importance, category, isPublished, startAt, endAt, targets, coverImageUrl, attachments, widgetIds, sendPush } = parsed.data;
 
     if (user.role === 'STORE_ADMIN') {
-        const hasInvalidTarget = targets.some(t => t.targetType === 'ALL');
+        const hasInvalidTarget = !storeAdminTargetsAreValid(user, targets) || category !== 'GENERAL';
         if (hasInvalidTarget) return Response.json({ error: '権限がありません' }, { status: 403 });
     }
 

@@ -18,22 +18,16 @@ export default function PdfThumbnail({ url, className = "" }: PdfThumbnailProps)
         const loadPdf = async () => {
             try {
                 // 1. pdf.js を CDN から動的にスクリプトタグで読み込む (より確実な方法)
-                if (!(window as any).pdfjsLib) {
-                    const script = document.createElement('script');
-                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-                    document.head.appendChild(script);
-                    await new Promise((resolve) => script.onload = resolve);
-                }
-
-                const pdfjsLib = (window as any).pdfjsLib;
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                const pdfjsLib = await import('pdfjs-dist');
+                pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+                    'pdfjs-dist/build/pdf.worker.min.mjs',
+                    import.meta.url
+                ).toString();
 
                 // 2. ドキュメント読み込み
                 const loadingTask = pdfjsLib.getDocument({
                     url: getProxyUrl(url),
                     withCredentials: true, // 認証クッキーを送信する
-                    cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
-                    cMapPacked: true,
                 });
                 
                 const pdf = await loadingTask.promise;
@@ -53,6 +47,7 @@ export default function PdfThumbnail({ url, className = "" }: PdfThumbnailProps)
                 canvas.width = viewport.width;
 
                 const renderTask = page.render({
+                    canvas,
                     canvasContext: context,
                     viewport: viewport
                 });

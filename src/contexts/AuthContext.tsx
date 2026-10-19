@@ -64,6 +64,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (res.ok) {
                 const data = await res.json();
                 setUser(data.data);
+                if (data.data.mustChangePw && !window.location.pathname.startsWith('/profile')) {
+                    window.location.replace('/profile');
+                    return;
+                }
                 refreshUnreadCount();
             } else {
                 setUser(null);

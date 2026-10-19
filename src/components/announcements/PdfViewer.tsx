@@ -18,21 +18,15 @@ export default function PdfViewer({ url }: PdfViewerProps) {
         
         const loadPdf = async () => {
             try {
-                if (!(window as any).pdfjsLib) {
-                    const script = document.createElement('script');
-                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-                    document.head.appendChild(script);
-                    await new Promise((resolve) => script.onload = resolve);
-                }
-
-                const pdfjsLib = (window as any).pdfjsLib;
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                const pdfjsLib = await import('pdfjs-dist');
+                pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+                    'pdfjs-dist/build/pdf.worker.min.mjs',
+                    import.meta.url
+                ).toString();
 
                 const loadingTask = pdfjsLib.getDocument({
                     url: getProxyUrl(url),
                     withCredentials: true,
-                    cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
-                    cMapPacked: true,
                 });
                 
                 const loadedPdf = await loadingTask.promise;
@@ -103,6 +97,7 @@ function PdfPage({ pageNumber, pdf }: { pageNumber: number, pdf: any }) {
                 canvas.width = viewport.width;
 
                 renderTask = page.render({
+                    canvas,
                     canvasContext: context,
                     viewport: viewport
                 });

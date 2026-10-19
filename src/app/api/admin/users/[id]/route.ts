@@ -113,6 +113,9 @@ export async function PATCH(request: Request, { params }: Params) {
     const body = await request.json();
     const parsed = patchUserSchema.safeParse(body);
     if (!parsed.success) return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    if (parsed.data.password && parsed.data.password.length < 10) {
+        return Response.json({ error: 'パスワードは10文字以上で入力してください' }, { status: 400 });
+    }
 
     const updates: string[] = [];
     const vals: unknown[] = [];

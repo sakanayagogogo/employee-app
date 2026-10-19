@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -47,3 +48,13 @@ test_*.js
 run-migration*.js
 server_log*.txt
 *_result*.json
+
+# local credentials and database inspection output
+/vapid_keys.json
+/users_pw.json
+/results.json
+/results_refs.json
+/db_output*.json
+/schema_check.json
+/test_results.txt
+/list_users_pw.js

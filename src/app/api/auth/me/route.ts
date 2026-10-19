@@ -2,7 +2,7 @@ import { queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 
 export async function GET() {
-    const user = await getCurrentUser();
+    const user = await getCurrentUser({ allowPasswordChangeRequired: true });
     if (!user) return Response.json({ error: '認証が必要です' }, { status: 401 });
 
     const row = await queryOne<{

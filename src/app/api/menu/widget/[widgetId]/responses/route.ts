@@ -1,5 +1,6 @@
-import { query, queryOne } from '@/lib/db';
+import { query } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { getAccessibleWidget } from '@/lib/content-access';
 
 type Params = { params: Promise<{ widgetId: string }> };
 
@@ -12,10 +13,7 @@ export async function GET(request: Request, { params }: Params) {
     const { widgetId } = await params;
     const widgetIdInt = parseInt(widgetId);
 
-    const widget = await queryOne<{ id: number; type: string; title: string; config_json: Record<string, unknown> }>(
-        `SELECT id, type, title, config_json FROM portal_widgets WHERE id = $1`,
-        [widgetIdInt]
-    );
+    const widget = await getAccessibleWidget(user, widgetIdInt, { manage: true });
 
     if (!widget) {
         return Response.json({ error: 'ウィジェットが見つかりません' }, { status: 404 });

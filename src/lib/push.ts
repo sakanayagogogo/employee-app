@@ -1,12 +1,17 @@
 import webpush from 'web-push';
 import { query } from '@/lib/db';
 
-// Configure VAPID
-webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT || 'mailto:admin@kizuna-union.jp',
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-    process.env.VAPID_PRIVATE_KEY!,
-);
+const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+const vapidConfigured = Boolean(vapidPublicKey && vapidPrivateKey);
+
+if (vapidConfigured) {
+    webpush.setVapidDetails(
+        process.env.VAPID_SUBJECT || 'mailto:admin@kizuna-union.jp',
+        vapidPublicKey!,
+        vapidPrivateKey!,
+    );
+}
 
 interface PushPayload {
     title: string;
@@ -30,7 +35,7 @@ export async function sendPushToUsers(
     payload: PushPayload,
     notificationType: 'announcements' | 'inquiries' = 'announcements'
 ) {
-    if (userIds.length === 0) return;
+    if (userIds.length === 0 || !vapidConfigured) return;
 
     const prefColumn = notificationType === 'inquiries' ? 'notify_inquiries' : 'notify_announcements';
 

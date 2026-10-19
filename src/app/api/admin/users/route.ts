@@ -146,6 +146,9 @@ export async function POST(request: Request) {
     }
     const parsed = createUserSchema.safeParse(body);
     if (!parsed.success) return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    if (parsed.data.password && parsed.data.password.length < 10) {
+        return Response.json({ error: 'パスワードは10文字以上で入力してください' }, { status: 400 });
+    }
 
     // Check if the user has permission to create users with the specified role and store
     if (user.role === 'STORE_ADMIN' && parsed.data.role === 'HQ_ADMIN') {
@@ -166,12 +169,7 @@ export async function POST(request: Request) {
     }
 
     try {
-        let rawPassword = parsed.data.password;
-        if (!rawPassword && typeof parsed.data.birthday === 'string') {
-            // Initial password is birthday in YYYYMMDD format
-            rawPassword = parsed.data.birthday.replace(/-/g, '');
-        }
-
+        const rawPassword = parsed.data.password;
         if (!rawPassword) {
             return Response.json({ error: 'パスワードまたは誕生日を入力してください' }, { status: 400 });
         }

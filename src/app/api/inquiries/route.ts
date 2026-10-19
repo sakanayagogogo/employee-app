@@ -2,21 +2,21 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { query, queryOne, transaction } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
-import { isAdmin } from '@/lib/rbac';
+import { canAccessStore, isAdmin } from '@/lib/rbac';
 import { sendInquiryPush } from '@/lib/push';
 
 const createSchema = z.object({
     title: z.string().min(1).max(200),
     destination: z.enum(['STORE', 'HEADQUARTERS']),
     category: z.enum(['労務', '業務', '教育', '人間関係', '設備', 'その他']),
-    message: z.string().min(1),
+    message: z.string().min(1).max(10_000),
     recipientId: z.number().int().positive().optional(),
 });
 
 const listSchema = z.object({
     status: z.enum(['OPEN', 'IN_PROGRESS', 'CLOSED']).optional(),
-    limit: z.coerce.number().default(50),
-    offset: z.coerce.number().default(0),
+    limit: z.coerce.number().int().min(1).max(100).default(50),
+    offset: z.coerce.number().int().min(0).default(0),
 });
 
 export async function GET(request: NextRequest) {
@@ -129,6 +129,25 @@ export async function POST(request: Request) {
     // Only admins can specify a recipient
     if (recipientId && !isAdmin(user.role)) {
         return Response.json({ error: '宛先の指定は管理者のみ可能です' }, { status: 403 });
+    }
+
+    // Store administrators may only address users within their authorized scope.
+    if (recipientId && user.role === 'STORE_ADMIN') {
+        const scopedRecipient = await queryOne<{ store_id: number | null; group_id: number | null }>(
+            `SELECT u.store_id, s.group_id
+             FROM users u LEFT JOIN stores s ON s.id = u.store_id
+             WHERE u.id = $1 AND u.is_active = TRUE`,
+            [recipientId]
+        );
+        if (!scopedRecipient || scopedRecipient.store_id === null || !canAccessStore(
+            user.role,
+            user.storeId,
+            scopedRecipient.store_id,
+            user.unionRole,
+            scopedRecipient.group_id
+        )) {
+            return Response.json({ error: 'Forbidden' }, { status: 403 });
+        }
     }
 
     // Validate recipient exists if specified

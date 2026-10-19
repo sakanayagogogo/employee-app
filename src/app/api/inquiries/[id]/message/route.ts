@@ -2,11 +2,12 @@ import { z } from 'zod';
 import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 import { sendInquiryPush } from '@/lib/push';
+import { canAccessInquiry } from '@/lib/content-access';
 
 type Params = { params: Promise<{ id: string }> };
 
 const messageSchema = z.object({
-    body: z.string().min(1),
+    body: z.string().min(1).max(10_000),
 });
 
 export async function POST(request: Request, { params }: Params) {
@@ -25,6 +26,10 @@ export async function POST(request: Request, { params }: Params) {
     );
     if (!inquiry) return Response.json({ error: '相談が見つかりません' }, { status: 404 });
     if (inquiry.status === 'CLOSED') return Response.json({ error: 'クローズ済みの相談には返信できません' }, { status: 400 });
+
+    if (!(await canAccessInquiry(user, inquiryId))) {
+        return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     // Check access
     if (user.role === 'GENERAL' && inquiry.author_id !== parseInt(user.sub)) {

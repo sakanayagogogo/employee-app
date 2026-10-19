@@ -4,12 +4,12 @@ import { getCurrentUser } from '@/lib/auth';
 import { hashPassword, verifyPassword } from '@/lib/password';
 
 const passwordSchema = z.object({
-    currentPassword: z.string().min(1),
-    newPassword: z.string().min(4, 'パスワードは4文字以上で入力してください'),
+    currentPassword: z.string().min(1).max(128),
+    newPassword: z.string().min(10, 'パスワードは10文字以上で入力してください').max(128),
 });
 
 export async function POST(request: Request) {
-    const user = await getCurrentUser();
+    const user = await getCurrentUser({ allowPasswordChangeRequired: true });
     if (!user) return Response.json({ error: '認証が必要です' }, { status: 401 });
 
     try {
@@ -18,28 +18,28 @@ export async function POST(request: Request) {
         if (!parsed.success) return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
 
         const { currentPassword, newPassword } = parsed.data;
+        if (currentPassword === newPassword) {
+            return Response.json({ error: '現在と異なるパスワードを指定してください' }, { status: 400 });
+        }
 
-        // Verify current password
         const dbUser = await queryOne<{ password_hash: string }>(
-            `SELECT password_hash FROM users WHERE id = $1`,
-            [parseInt(user.sub)]
+            `SELECT password_hash FROM users WHERE id = $1 AND is_active = TRUE`,
+            [Number.parseInt(user.sub, 10)]
         );
-
         if (!dbUser) return Response.json({ error: 'ユーザーが見つかりません' }, { status: 404 });
 
         const isValid = await verifyPassword(currentPassword, dbUser.password_hash);
         if (!isValid) return Response.json({ error: '現在のパスワードが正しくありません' }, { status: 400 });
 
-        // Hash and update
         const hash = await hashPassword(newPassword);
         await query(
             `UPDATE users SET password_hash = $1, must_change_pw = FALSE, updated_at = NOW() WHERE id = $2`,
-            [hash, parseInt(user.sub)]
+            [hash, Number.parseInt(user.sub, 10)]
         );
 
         return Response.json({ success: true, message: 'パスワードを変更しました' });
-    } catch (e) {
-        console.error(e);
+    } catch (error) {
+        console.error('[password change]', error);
         return Response.json({ error: '更新に失敗しました' }, { status: 500 });
     }
 }

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { query } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { canViewAnnouncement } from '@/lib/content-access';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -14,6 +15,9 @@ export async function GET(request: Request, { params }: Params) {
 
     const { id } = await params;
     const announcementId = parseInt(id);
+    if (!Number.isSafeInteger(announcementId) || !(await canViewAnnouncement(user, announcementId))) {
+        return Response.json({ error: 'Announcement not found' }, { status: 404 });
+    }
 
     const comments = await query<{
         id: number; body: string; created_at: string;
@@ -44,6 +48,10 @@ export async function POST(request: Request, { params }: Params) {
     if (!user) return Response.json({ error: '認証が必要です' }, { status: 401 });
 
     const { id } = await params;
+    const announcementId = parseInt(id);
+    if (!Number.isSafeInteger(announcementId) || !(await canViewAnnouncement(user, announcementId))) {
+        return Response.json({ error: 'Announcement not found' }, { status: 404 });
+    }
     
     try {
         const body = await request.json();
@@ -52,7 +60,7 @@ export async function POST(request: Request, { params }: Params) {
 
         const result = await query(
             `INSERT INTO announcement_comments (announcement_id, user_id, body) VALUES ($1, $2, $3) RETURNING id`,
-            [parseInt(id), parseInt(user.sub), parsed.data.body]
+            [announcementId, parseInt(user.sub), parsed.data.body]
         );
 
         return Response.json({ success: true });

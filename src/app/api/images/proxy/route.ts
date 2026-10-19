@@ -22,9 +22,10 @@ export async function GET(request: NextRequest) {
         'www.t-union.jp'
     ];
     
+    let parsedUrl: URL;
     try {
-        const parsedUrl = new URL(targetUrl);
-        if (!allowedDomains.includes(parsedUrl.hostname)) {
+        parsedUrl = new URL(targetUrl);
+        if (parsedUrl.protocol !== 'https:' || !allowedDomains.includes(parsedUrl.hostname)) {
             return new Response('Forbidden domain', { status: 403 });
         }
     } catch {
@@ -33,11 +34,18 @@ export async function GET(request: NextRequest) {
 
     // 4. 画像の取得
     try {
-        const auth = Buffer.from('t-union:union2656').toString('base64');
-        const response = await fetch(targetUrl, {
+        const uploadBasicUser = process.env.UPLOAD_BASIC_USER;
+        const uploadBasicPassword = process.env.UPLOAD_BASIC_PASSWORD;
+        if (!uploadBasicUser || !uploadBasicPassword) {
+            return new Response('Image service is not configured', { status: 503 });
+        }
+        const auth = Buffer.from(`${uploadBasicUser}:${uploadBasicPassword}`).toString('base64');
+        const response = await fetch(parsedUrl, {
             headers: {
                 'Authorization': `Basic ${auth}`
-            }
+            },
+            redirect: 'error',
+            signal: AbortSignal.timeout(15_000),
         });
 
         if (!response.ok) {
@@ -45,13 +53,20 @@ export async function GET(request: NextRequest) {
         }
 
         // 5. 画像・PDFデータをストリームとして返却
-        const contentType = response.headers.get('Content-Type') || 'application/octet-stream';
+        const contentType = response.headers.get('Content-Type')?.split(';')[0].trim().toLowerCase() || '';
+        const allowedContentTypes = new Set([
+            'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf',
+        ]);
+        if (!allowedContentTypes.has(contentType)) {
+            return new Response('Unsupported content type', { status: 415 });
+        }
         
         // Next.jsのレスポンスとして、元サーバーのBody（ReadableStream）をそのまま渡す
         return new Response(response.body, {
             headers: {
                 'Content-Type': contentType,
-                'Cache-Control': 'public, max-age=31536000, immutable',
+                'Cache-Control': 'private, no-store',
+                'X-Content-Type-Options': 'nosniff',
             },
         });
     } catch (error) {

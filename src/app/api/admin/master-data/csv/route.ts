@@ -20,6 +20,9 @@ export async function POST(request: Request) {
         return Response.json({ error: 'ファイルが必要です' }, { status: 400 });
     }
 
+    if ((file as Blob).size > 5 * 1024 * 1024) {
+        return Response.json({ error: 'CSV file must be 5 MB or smaller' }, { status: 413 });
+    }
     const bytes = await (file as Blob).arrayBuffer();
     const buffer = Buffer.from(bytes);
     let records: Record<string, string>[];

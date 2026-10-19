@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const dateFilter = 'AND (a.start_at IS NULL OR a.start_at <= NOW()) AND (a.end_at IS NULL OR a.end_at >= NOW())';
     
     let targetClause = '';
-    const vals: any[] = [userId];
+    const vals: unknown[] = [userId];
 
     if (user.role !== 'HQ_ADMIN') {
         vals.push(userIdStr, storeIdStr, groupIdStr, empTypeStr, uRoleStr);
@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
         );
 
         return Response.json({ count: parseInt(row?.count ?? '0') });
-    } catch (e: any) {
-        return Response.json({ error: e.message }, { status: 500 });
+    } catch (error) {
+        console.error('[announcement unread count]', error);
+        return Response.json({ error: 'Failed to load unread count' }, { status: 500 });
     }
 }

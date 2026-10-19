@@ -19,6 +19,9 @@ export async function POST(request: Request) {
         return Response.json({ error: 'ファイルが必要です' }, { status: 400 });
     }
 
+    if ((file as Blob).size > 5 * 1024 * 1024) {
+        return Response.json({ error: 'CSV file must be 5 MB or smaller' }, { status: 413 });
+    }
     const bytes = await (file as Blob).arrayBuffer();
     const buffer = Buffer.from(bytes);
     
@@ -114,12 +117,6 @@ export async function POST(request: Request) {
                 for (const row of normalizedRecords) {
                     const pw = row.password?.trim();
                     if (pw) uniquePasswords.add(pw);
-                    const bd = row.birthday?.trim();
-                    if (bd && !bd.includes('#') && bd.length >= 8) {
-                        const clean = bd.replace(/[\/\.]/g, '-');
-                        const parts = clean.split('-');
-                        if (parts.length === 3) uniquePasswords.add(`${parts[0]}${parts[1].padStart(2, '0')}${parts[2].padStart(2, '0')}`);
-                    }
                 }
                 
                 if (uniquePasswords.size > 0) {
@@ -173,9 +170,13 @@ export async function POST(request: Request) {
 
                         const isUpdate = existingEmpNumbers.has(employee_number);
                         const rawPw = password?.trim();
+                        if (rawPw && rawPw.length < 10) {
+                            errors.push({ row: rowNum, message: 'パスワードは10文字以上で入力してください' });
+                            continue;
+                        }
                         const pwHash = rawPw ? (passwordCache.get(rawPw) || (await hashPassword(rawPw))) : '';
 
-                        if (!isUpdate && !pwHash && !cleanBirthday) {
+                        if (!isUpdate && !pwHash) {
                             errors.push({ row: rowNum, message: '新規登録にはパスワードが必要です' });
                             continue;
                         }

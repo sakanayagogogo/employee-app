@@ -3,6 +3,7 @@ import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
 import { isAdmin } from '@/lib/rbac';
 import { logAudit } from '@/lib/audit';
+import { canAccessInquiry } from '@/lib/content-access';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -27,6 +28,10 @@ export async function PATCH(request: Request, { params }: Params) {
     );
     if (!inquiry) return Response.json({ error: '相談が見つかりません' }, { status: 404 });
 
+    if (!(await canAccessInquiry(user, inquiryId))) {
+        return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     // STORE_ADMIN access control: must have permission for this store
     if (user.role === 'STORE_ADMIN') {
         const { canAccessStore } = await import('@/lib/rbac');
@@ -38,6 +43,26 @@ export async function PATCH(request: Request, { params }: Params) {
     const body = await request.json();
     const parsed = statusSchema.safeParse(body);
     if (!parsed.success) return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
+
+    if (parsed.data.assigneeId !== undefined && parsed.data.assigneeId !== null) {
+        const assignee = await queryOne<{ store_id: number | null; group_id: number | null; role: string }>(
+            `SELECT u.store_id, s.group_id, u.role
+             FROM users u LEFT JOIN stores s ON s.id = u.store_id
+             WHERE u.id = $1 AND u.is_active = TRUE`,
+            [parsed.data.assigneeId]
+        );
+        if (!assignee || assignee.role === 'GENERAL') {
+            return Response.json({ error: 'Invalid assignee' }, { status: 400 });
+        }
+        if (user.role === 'STORE_ADMIN') {
+            const { canAccessStore } = await import('@/lib/rbac');
+            if (assignee.store_id === null || !canAccessStore(
+                user.role, user.storeId, assignee.store_id, user.unionRole, assignee.group_id
+            )) {
+                return Response.json({ error: 'Forbidden' }, { status: 403 });
+            }
+        }
+    }
 
     const updates: string[] = [];
     const vals: unknown[] = [];

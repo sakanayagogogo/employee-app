@@ -1,5 +1,6 @@
 import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
+import { canViewAnnouncement } from '@/lib/content-access';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -9,6 +10,9 @@ export async function POST(request: Request, { params }: Params) {
 
     const { id } = await params;
     const announcementId = parseInt(id);
+    if (!Number.isSafeInteger(announcementId) || !(await canViewAnnouncement(user, announcementId))) {
+        return Response.json({ error: 'Announcement not found' }, { status: 404 });
+    }
     const userId = parseInt(user.sub);
 
     // Toggle like

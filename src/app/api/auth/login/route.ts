@@ -1,4 +1,3 @@
-import { cookies } from 'next/headers';
 import { z } from 'zod';
 import { query, queryOne } from '@/lib/db';
 import { signJWT } from '@/lib/jwt';
@@ -7,8 +6,8 @@ import { logAudit } from '@/lib/audit';
 import { AUTH_COOKIE } from '@/lib/auth';
 
 const loginSchema = z.object({
-    employeeNumber: z.string().min(1),
-    password: z.string().min(1),
+    employeeNumber: z.string().min(1).max(50),
+    password: z.string().min(1).max(128),
 });
 
 export async function POST(request: Request) {
@@ -18,7 +17,7 @@ export async function POST(request: Request) {
         if (!parsed.success) return Response.json({ error: '必須項目が不足しています' }, { status: 400 });
 
         const { employeeNumber, password } = parsed.data;
-        const ip = request.headers.get('x-forwarded-for') || '0.0.0.0';
+        const ip = (request.headers.get('x-forwarded-for') || '0.0.0.0').split(',')[0].trim();
 
         // --- Basic Rate Limiting Check ---
         const recentFailures = await queryOne<{ count: string }>(
@@ -52,6 +51,16 @@ export async function POST(request: Request) {
             return Response.json({ error: 'このアカウントは現在停止されています' }, { status: 403 });
         }
 
+        const recentAccountFailures = await queryOne<{ count: string }>(
+            `SELECT COUNT(*) AS count FROM audit_logs
+             WHERE action = 'LOGIN_FAILURE' AND entity_type = 'users' AND entity_id = $1
+               AND created_at > NOW() - INTERVAL '10 minutes'`,
+            [user.id]
+        );
+        if (parseInt(recentAccountFailures?.count || '0') >= 5) {
+            return Response.json({ error: 'Too many login attempts. Try again later.' }, { status: 429 });
+        }
+
         const valid = await verifyPassword(password, user.password_hash);
         if (!valid) {
             await logAudit(null, 'LOGIN_FAILURE', 'users', user.id, { employeeNumber, id: user.id, reason: 'invalid_password' }, ip);
@@ -68,6 +77,7 @@ export async function POST(request: Request) {
             employmentType: user.employment_type,
             unionRole: user.union_role,
             jobTitle: user.job_title,
+            mustChangePw: user.must_change_pw,
         };
 
         const token = await signJWT(payload);

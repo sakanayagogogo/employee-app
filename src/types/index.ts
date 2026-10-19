@@ -21,6 +21,7 @@ export interface JWTPayload {
   employmentType: EmploymentType;
   unionRole?: UnionRole;
   jobTitle?: string | null;
+  mustChangePw?: boolean;
   iat?: number;
   exp?: number;
 }

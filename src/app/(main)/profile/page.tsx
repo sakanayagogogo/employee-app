@@ -17,6 +17,10 @@ export default function ProfileDashboardPage() {
     const [bookmarks, setBookmarks] = useState<any[]>([]);
     const [loadingBookmarks, setLoadingBookmarks] = useState(false);
     const [activeTab, setActiveTab] = useState<'profile' | 'bookmarks' | 'password' | 'notifications'>('profile');
+
+    useEffect(() => {
+        if (user?.mustChangePw) setActiveTab('password');
+    }, [user?.mustChangePw]);
     const [passForm, setPassForm] = useState({ current: '', next: '', confirm: '' });
     const [passSaving, setPassSaving] = useState(false);
 
@@ -93,6 +97,8 @@ export default function ProfileDashboardPage() {
             if (res.ok) {
                 setMessage({ type: 'success', text: 'パスワードを変更しました。' });
                 setPassForm({ current: '', next: '', confirm: '' });
+                await refresh();
+                if (user?.mustChangePw) router.replace('/home');
             } else {
                 const data = await res.json();
                 setMessage({ type: 'error', text: data.error || '変更に失敗しました。' });

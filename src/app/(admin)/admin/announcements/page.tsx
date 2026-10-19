@@ -6,8 +6,6 @@ import Link from 'next/link';
 import { getProxyUrl } from '@/lib/image';
 
 // PHP Upload Configuration
-const UPLOAD_API_URL = 'https://t-union.jp/upload.php'; // 実際のURLに書き換えてください
-const UPLOAD_API_KEY = 'union-connect-secret-key-12345'; // PHP側と一致させてください
 
 interface Announcement {
     id: number;
@@ -95,13 +93,8 @@ export default function AdminAnnouncementsPage() {
         const formData = new FormData();
         formData.append('image', file);
 
-        const auth = btoa('t-union:union2656');
-        const res = await fetch(UPLOAD_API_URL, {
+        const res = await fetch('/api/uploads', {
             method: 'POST',
-            headers: { 
-                'X-API-KEY': UPLOAD_API_KEY,
-                'Authorization': `Basic ${auth}`
-            },
             body: formData,
         });
         const data = await res.json();

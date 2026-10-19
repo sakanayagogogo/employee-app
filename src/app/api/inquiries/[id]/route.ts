@@ -1,6 +1,6 @@
 import { query, queryOne } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
-import { isAdmin } from '@/lib/rbac';
+import { canAccessInquiry } from '@/lib/content-access';
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -96,7 +96,7 @@ export async function DELETE(_req: Request, { params }: Params) {
     if (!inquiry) return Response.json({ error: '相談が見つかりません' }, { status: 404 });
 
     // Allow if admin or if user is the author
-    const isUserAdmin = isAdmin(user.role);
+    const isUserAdmin = await canAccessInquiry(user, inquiryId);
     const isAuthor = inquiry.author_id === parseInt(user.sub);
 
     if (!isUserAdmin && !isAuthor) {
