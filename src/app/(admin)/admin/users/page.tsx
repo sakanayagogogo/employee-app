@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface User {
     id: number;
@@ -38,6 +39,7 @@ type TreeFilter =
 
 export default function AdminUsersPage() {
     const router = useRouter();
+    const { user: currentUser } = useAuth();
     const [users, setUsers] = useState<User[]>([]);
     const [stores, setStores] = useState<Store[]>([]);
     const [loading, setLoading] = useState(true);
@@ -329,13 +331,17 @@ export default function AdminUsersPage() {
                         </p>
                     </div>
                     <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-                        <button onClick={downloadTemplate} className="flex items-center gap-2 border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
-                            📄 テンプレート
-                        </button>
-                        <button onClick={() => csvRef.current?.click()} className="flex items-center gap-2 border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
-                            📥 CSV取込
-                        </button>
-                        <input ref={csvRef} type="file" accept=".csv" className="hidden" onChange={handleCsvUpload} />
+                        {currentUser?.role === 'HQ_ADMIN' && (
+                            <>
+                                <button onClick={downloadTemplate} className="flex items-center gap-2 border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+                                    📄 テンプレート
+                                </button>
+                                <button onClick={() => csvRef.current?.click()} className="flex items-center gap-2 border border-gray-200 text-gray-600 px-3 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors">
+                                    📥 CSV取込
+                                </button>
+                                <input ref={csvRef} type="file" accept=".csv" className="hidden" onChange={handleCsvUpload} />
+                            </>
+                        )}
                         <Link href="/admin/users/new" className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-xl font-bold hover:bg-orange-700 transition-all shadow-lg shadow-orange-200 text-sm">
                             + 新規登録
                         </Link>

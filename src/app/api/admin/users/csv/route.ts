@@ -1,6 +1,5 @@
-import { query, queryOne } from '@/lib/db';
+import { query } from '@/lib/db';
 import { getCurrentUser } from '@/lib/auth';
-import { isAdmin } from '@/lib/rbac';
 import { hashPassword } from '@/lib/password';
 import { logAudit } from '@/lib/audit';
 import { parse } from 'csv-parse/sync';
@@ -8,7 +7,11 @@ import iconv from 'iconv-lite';
 
 export async function POST(request: Request) {
     const user = await getCurrentUser();
-    if (!user || !isAdmin(user.role)) return Response.json({ error: '権限がありません' }, { status: 403 });
+    // CSV import can create, update, elevate, and delete users in bulk.
+    // It must never be available to store-scoped administrators.
+    if (!user || user.role !== 'HQ_ADMIN') {
+        return Response.json({ error: '権限がありません' }, { status: 403 });
+    }
 
     const formData = await request.formData();
     const file = formData.get('file');

@@ -119,6 +119,26 @@ export async function PATCH(request: Request, { params }: Params) {
     let idx = 1;
     const d = parsed.data;
 
+    // Checking only the user's current store is insufficient: a STORE_ADMIN
+    // could otherwise move the user to an arbitrary store (or HQ) in the same
+    // request. Validate the destination before building the update query.
+    if (user.role !== 'HQ_ADMIN' && d.storeId !== undefined) {
+        if (d.storeId === null) {
+            return Response.json({ error: '権限がありません' }, { status: 403 });
+        }
+
+        const destinationStore = await queryOne<{ group_id: number | null }>(
+            'SELECT group_id FROM stores WHERE id = $1',
+            [d.storeId]
+        );
+        if (!destinationStore) {
+            return Response.json({ error: '店舗が見つかりません' }, { status: 400 });
+        }
+        if (!canAccessStore(user.role, user.storeId, d.storeId, user.unionRole, destinationStore.group_id)) {
+            return Response.json({ error: '権限がありません' }, { status: 403 });
+        }
+    }
+
     if (d.name !== undefined) { updates.push(`name = $${idx++}`); vals.push(d.name); }
     if (d.email !== undefined) { updates.push(`email = $${idx++}`); vals.push(d.email ?? null); }
     if (d.role !== undefined) {

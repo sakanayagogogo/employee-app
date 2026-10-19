@@ -184,7 +184,7 @@ export default function EditUserPage() {
                                 onChange={e => setForm({ ...form, role: e.target.value })} 
                                 className="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900"
                             >
-                                {masters.filter(m => m.category === 'user_role').map(m => (
+                                {masters.filter(m => m.category === 'user_role' && (currentUser?.role === 'HQ_ADMIN' || m.code !== 'HQ_ADMIN')).map(m => (
                                     <option key={m.code} value={m.code}>{m.name}</option>
                                 ))}
                             </select>
