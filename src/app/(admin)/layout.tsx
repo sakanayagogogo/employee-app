@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 const navItems = [
+    { href: '/admin/website', label: '公式ホームページ', exact: false, hqOnly: true,
+      icon: <span aria-hidden="true" className="text-xl">▣</span> },
     { 
         href: '/admin', 
         label: 'ダッシュ', 
