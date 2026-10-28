@@ -34,7 +34,7 @@ export default function WebsiteAdmin() {
     catch (e) { setMessage(e instanceof Error ? e.message : '画像をアップロードできませんでした'); } finally { setBusy(false); }
   }
   return <div className="space-y-6 pb-24 text-zinc-900">
-    <div><h1 className="text-2xl font-bold">公式ホームページ管理</h1><p className="mt-2 text-sm text-zinc-600">公開用の記事を作成します。<a className="text-emerald-700 underline" href="/website" target="_blank" rel="noreferrer">公開ページを見る ↗</a></p></div>
+    <div><h1 className="text-2xl font-bold">公式ホームページ管理</h1><p className="mt-2 text-sm text-zinc-600">公開用の記事を作成します。 <a href="/admin/website/design" className="text-emerald-700 underline">デザイン設定</a>　<a className="text-emerald-700 underline" href="/website" target="_blank" rel="noreferrer">公開ページを見る ↗</a></p></div>
     <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">公開記事と画像は誰でも閲覧できます。組合員限定の内容は掲載しないでください。</p>
     {message && <p role="status" className="rounded-xl bg-emerald-50 p-4 text-emerald-900">{message}</p>}
     <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
